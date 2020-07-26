@@ -3269,7 +3269,7 @@ async def logout(ctx):
 
 
 
-client.run('NjgzNDY4NzUwNTgyMDU0OTM3.XmQKAA.d-b7wI_Ld98o4YBUkpgE8dErpCE')
+client.run(token)
 
 
 

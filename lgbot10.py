@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 
-#================================
+# Hello this is my very first bot ever for discord
+# I'm just starting to learn things so expect to see some improvements in the future (I hope)
 
 import discord
 import asyncio

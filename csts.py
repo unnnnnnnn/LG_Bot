@@ -6,6 +6,8 @@ import os
 from discord.utils import get
 from discord.ext import commands
 
+with open("token.txt", 'r') as f:
+  bot_token = f.readline()
 
 liste_roles = ['Villageois','Voyante','Chasseur','Jaloux','Ancien','Sorcière','PF','Bouc','Idiot','Corbeau','Chaman','Renard','Ours','Soeur','Frère','Chevalier','Salvateur','LG','LGA','IPDL','LGB','Cupidon','JDF','Ange','Enfant','Voleur','Sectaire','Juge','Confesseur','Chaperon','Ankou','Dictateur','Noctambule','Oeil','Traitre','Imposteur','Faucheur','Servante','Assassin','Devin']
 #Liste de tous les rôles

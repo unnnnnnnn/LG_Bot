@@ -3479,7 +3479,7 @@ async def reset(ctx):
 
 
 
-client.run('NjgzNDY4NzUwNTgyMDU0OTM3.Xlr_4A.tU-nx-HaPhxiqgLmO2V-svPuVIk')
+client.run(token)
 
 
 

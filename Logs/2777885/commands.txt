@@ -1,0 +1,15 @@
+[11:51:51] Début des logs, création d'une partie 
+[11:51:51] Génération d'un token de partie: 2777885 
+ 
+[11:51:51] Liste des rôles de cette partie: LG 
+ 
+[11:52:06] Commande .start non exécutée par unnn#1091. 
+ 
+[11:52:06] Commande .setup exécutée: Oui 
+[11:52:06] Commande .create exécutée: Oui 
+[11:52:06] Commande .inscription exécutée: Oui 
+[11:52:06] Même nombre de joueurs que de rôles: Oui 
+[11:52:06] Status du couple correct: Oui 
+[11:52:06] Paramètre entré: non 
+[11:52:59] Reset enclenché, fin de la partie. 
+[11:52:59] Enregistrement des logs de commandes terminé.

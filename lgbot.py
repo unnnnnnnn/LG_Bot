@@ -23,92 +23,11 @@ os.chdir(os.path.dirname(__file__))
 client = commands.Bot(command_prefix=".")
 client.remove_command("help")
 
-#================================
 
+# ==========================================================================================================================================================
 
 
 """
-Rôles à tester:
-- Traître
-
-Rôles à ajouter:
-
-
-Idée de rôles:
-- Devin Blanc : Chaque nuit, il connaîtra le joueur qui a été désigné par les Loups-Garous, comme la Sorcière. Cependant, il connaîtra l'identité du joueur si celui-ci s'est fait sauvé par la Sorcière, par le Salvateur, ou s'il est Ancien.
-
-
-Changelog update 1.10:
-
-- Revamp total des messages du bot ✅
-    - Nouveaux messages
-    - Nouvelles commandes
-
-
-- Nouvelle commande inscription ✅
-    - Possibilité de retirer un membre spécifique
-    - Nouveau menu
-
-
-- Nouvelle commande help ✅
-    - Plusieurs menu 
-    - Navigation entre menus 
-( A FINIR (infos...) )
-
-
-- Annonces des rôles ✅
-    - Nouveau menu
-    - Récap tous les jours
-    - Intégrer les émojis dedans
-
-
-- Nouveau menu d'intéraction ✅
-    - Apparait de manière constante après avoir réalisé une action 
-    - Change en fonction du jour ou de la nuit
-        Jour (actions possibles):
-        - Tuer une personne
-        - Mute tout le monde (vote)
-        - Passer à la nuit
-        - Servante
-        - Infect
-        Nuit (actions possibles):
-        - Enfant sauvage
-        - Noctambule
-        - Cupidon
-        - Voleur
-        - Charmer
-        - Passer au jour
-
-
-- Faire du ménage dans le script
-    - Variables inutiles
-    - Mieux ordonner les choses
-    - Plusieurs scripts
-
-
-- Bug fix: 
-    - Enfant qui ne se fait pas mute/unmute du salon LG quand il meurt
-    - Enfant qui devient LG même si il est mort
-    - Infecté qui ne se fait pas mute/unmute du salon LG
-    - Rôles du Traître (il peut en avoir un qui est dans la partie)
-
-
-
-Update 1.11 ?
-
-- Stocks de données
-    - Toutes les infos de parties précédentes
-    - Rôles, participants...
-    - Logs de messages
-        - Problèmes: emojis
-
-- Fiche informations joueur
-    - Données stockées dans un .txt
-    - Affiche le nombre de parties
-    - Affiche le dernier rôle obtenu
-    - Nombre de victoires (?)
-
-- Nouveau système de vote
 
 """
 
@@ -116,52 +35,19 @@ Update 1.11 ?
 
 def initialize():
 
-    global Lroles_dispo, Lroles_traitre, Lroles_voleur, dicoimp, L_joueurs, Lp, channels, text_channel_list, emojis_action, dicomembers, dicop_id_to_emoji, dicop_name_to_emoji, dicop_emoji, Lemojis, inscription_chan, liste_couple, liste_charm, enfant_name, maitre_name, voleur_name, stolen_name, infect_name, killed_name, panel_author, imposteur_name, noctambule_name, victime_name, servante_name, devo_name, is_compo, is_channels, in_game, game_started, day, is_enfant, ancien_dead, check_couple, valuepf, cpt_jour, is_info, id_panel, id_vote, step, cpt_reaction, Lannonce_vote, Laffichage_vote, Laffichage_day, cant_talk, can_talk, can_see, annoncef, mdj, cr_commands, cr_chat, cr_actions, can_vote
+    global Lroles_dispo, Lroles_traitre, Lroles_voleur, Lp, channels, dicomembers, dicop_id_to_emoji, dicop_name_to_emoji, dicop_emoji, is_compo, is_channels, in_game, game_started, day, is_enfant, ancien_dead, check_couple, valuepf, cpt_jour, cant_talk, can_talk, can_see, mdj, cr_commands, cr_chat, cr_actions, can_vote
 
     Lroles_dispo = []
     #Liste des rôles disponibles dans 1 partie
-    Lroles_voleur = []
-    #Liste des rôles disponnibles pour l'imposteur/mîme/voleur thierc
-    Lroles_traitre = []
-    #Liste des rôles disponnibles pour le traître
-    dicoimp = {}
-    #Imposteur
-
-    L_joueurs = []
-    #Liste des joueurs dans 1 partie
     Lp = []
     #Liste finale de joueur
 
     channels = []
 
-    text_channel_list = []
-    emojis_action = []
-    #Liste des channels text du serveur
-
     dicomembers = {}
-    #Dictionnaire de joueurs (class members)
-
     dicop_id_to_emoji = {}
     dicop_name_to_emoji = {}
     dicop_emoji = {}
-    Lemojis = []
-
-    inscription_chan = None
-
-    liste_couple = []
-    liste_charm = []
-    enfant_name = None
-    maitre_name = None
-    voleur_name = None
-    stolen_name = None
-    infect_name = None
-    killed_name = None
-    panel_author = None
-    imposteur_name = None
-    noctambule_name = None
-    victime_name = None
-    servante_name = None
-    devo_name = None
 
     is_compo = False
     is_channels = False
@@ -181,20 +67,7 @@ def initialize():
     cpt_jour = 0
     #Compteur de jour
 
-    is_info = False
-
-    id_panel = 0
-    id_vote = 0
-    step = ''
-    cpt_reaction = 0
-
-    # Non utilisées
-    Lannonce_vote = []
-    Laffichage_vote = ""
-
     can_vote = False
-
-    annoncef = []
 
     mdj = None
 
@@ -230,7 +103,7 @@ async def on_ready():
 
 @client.event
 async def on_message(ctx):
-    global day, channels, valuepf, can_see, can_talk, cant_talk, Lemojis, Lroles_dispo, Lroles_voleur, Lroles_traitre, step, id_panel, cr_chat, Lp
+    global day, channels, Lroles_dispo, cr_chat, Lp
 
     author = ctx.author
     rolemdj = 'Maître du Jeu'
@@ -386,340 +259,12 @@ async def on_message(ctx):
     await client.process_commands(ctx)
 
 
-# ==========================================================================================================================================================
-
-
-@client.event
-async def on_reaction_add(reaction, user):
-
-    # Je déteste cette fonction elle est trop longue
-    # Faut que je fasse le ménage dedans parce que j'ai masse de trucs qui servent à rien
-    # 
-
-    global annoncef, page, liste_charm, id_panel, Lannonce_vote, step, cpt_reaction, liste_couple, enfant_name, Lp, victime_name, noctambule_name, maitre_name, stolen_name, infect_name, imposteur_name, killed_name, voleur_name, devo_name, servante_name, panel_author, is_enfant, p_emoji, check_couple, id_vote, cr_commands, can_vote, Lp
-
-    r_msg = reaction.message.id
-
-    # Event reaction
-
-    if user.bot:
-        # Si c'est un bot
-        pass
-
-    elif user == panel_author or step == 'Vote' or step == 'Imposteur' or step == "Menu" or step == 'Reset':
-        print("Reaction MDJ")
-        print(r_msg,id_panel)
-
-        if r_msg == id_panel:
-
-            print("Reaction panel")
-                
-            
-            if step == "Create" and reaction.emoji == '📖':
-                print('yo')
-                await reaction.message.channel.send("Nombre de rôles: {}".format(len(liste_roles)))
-                await reaction.message.channel.send(', '.join(liste_roles))
-                await reaction.message.remove_reaction(reaction, user)
-
-            elif reaction.emoji == '✅':
-                
-                if (maitre_name != None or len(liste_couple) != 0 or stolen_name != None or killed_name != None or infect_name != None or len(liste_charm) != 0 or victime_name != None or devo_name != None) and game_started == True:
-
-                    if step == 'Cupidon':
-                        await cupidon_action(reaction.message, reaction, user)
-
-                    elif step == 'Enfant':
-                        await enfant_action(reaction.message)
-
-                    elif step == 'Voleur': 
-                        await voleur_action(reaction.message)
-
-                    elif step == 'Infecté':
-                        await infect_action(reaction.message)
-
-                    elif step == 'Charmé':
-                        await charm_action(reaction.message)
-
-                    elif step == 'Kill':
-                        await kill_action(reaction.message)
-
-                    elif step == 'Noctambule':
-                        await noctambule_action(reaction.message)
-
-                    elif step == 'Servante':
-                        await voleur_action(reaction.message)
-                        await kill_action(reaction.message)
-
-
-                elif step == 'Vote':
-                    await reaction.message.channel.send("**Les votes sont terminés**")
-                    can_vote = False
-                    await reaction.message.delete()
-                    await menu(reaction.message)
-                    
-
-
-                elif step == "Reset":
-                    await reaction.message.delete()
-                    await reaction.message.channel.send("<@{.id}> **Vous avez décidé d'arrêter la partie en cours.**".format(user))
-                    await reset(reaction.message)
-
-
-                else:
-                    await reaction.message.channel.send("ERREUR: Vous n'avez sélectionné personne.")
-                    await reaction.message.remove_reaction(reaction, user)
-
-            elif reaction.emoji == "❌":
-                await reaction.message.delete()
-                cpt_reaction = 0
-                await reaction.message.channel.send("Commande annulée.")
-                cr_commands.append("[{}] Action précédente annulée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), user))
-                await menu(reaction.message)
-
-            elif reaction.emoji == '⏱️' and step == 'Vote':
-                can_vote = True
-                for member in dicop_name_to_emoji:
-                    fiche = Lp[dicomembers[member]]
-                    if str(fiche[1]) == 'Mort':
-                        pass
-                    else:
-                        Lp[dicomembers[member]][13] = 'Oui'
-                        print("ok peut voter {.name}".format(member))
-                await reaction.message.channel.send("**Les participants peuvent voter !**")
-
-            elif reaction.emoji in dicop_emoji:
-
-                print(cpt_reaction)
-                print("Reaction emoji joueur")
-                cpt_reaction += 1
-                p_emoji = reaction.emoji
-
-                if ((cpt_reaction > 1) and (step =='Servante' or step == 'Enfant' or step == 'Voleur' or step == 'Infecté' or step == 'Kill' or step == 'Noctambule')) or (cpt_reaction > 2 and (step == 'Cupidon' or step == 'Charmé')):
-
-                    if step == 'Enfant' or step == 'Voleur' or step == 'Infecté' or step == 'Kill' or step == 'Noctambule':
-                        await reaction.message.channel.send("Vous ne pouvez pas ajouter d'autres personnes.")
-                        for reac in reaction.message.reactions:
-                            try:
-                                await reaction.message.remove_reaction(reac, user)
-                            except:
-                                pass
-
-                else:
-                    if step == 'Cupidon':
-                        print("reaction cupi")
-                        liste_couple.append(dicop_emoji[reaction.emoji][0])
-                        await reaction.message.channel.send("{} a été ajouté à la liste des amants".format(dicop_emoji[reaction.emoji][0]))
-
-                    elif step == 'Enfant':
-                        print("reaction enfant")
-                        maitre_name = dicop_emoji[reaction.emoji][0]     
-                        print(reaction.emoji, maitre_name)
-                        await reaction.message.channel.send("{} a été séléctionné en dans que Maître de l'enfant".format(str(maitre_name)))
-
-                    elif step == 'Voleur':
-                        print("reaction voleur")
-                        stolen_name = dicop_emoji[reaction.emoji][0]
-                        print(reaction.emoji, stolen_name)      
-                        await reaction.message.channel.send("{} a été séléctionné en tant que cible du Voleur".format(str(stolen_name)))
-
-                    elif step == 'Infecté':
-                        print("reaction infect")
-                        infect_name = dicop_emoji[reaction.emoji][0]      
-                        print(reaction.emoji, infect_name)
-                        await reaction.message.channel.send("{} a été séléctionné en tant qu'infecté".format(str(infect_name)))
-
-                    elif step == 'Charmé':
-                        print("reaction charmé")
-                        liste_charm.append(dicop_emoji[reaction.emoji][0])
-                        await reaction.message.channel.send("{} a été ajouté à la liste des charmés".format(dicop_emoji[reaction.emoji][0]))  
-
-                    elif step == 'Kill':
-                        print("reaction kill")
-                        killed_name = dicop_emoji[reaction.emoji][0]      
-                        print(reaction.emoji, killed_name)
-                        await reaction.message.channel.send("{} a été séléctionné en tant que personne à tuer".format(str(killed_name)))
-
-                    elif step == 'Noctambule':
-                        print('reaction noctambule')
-                        victime_name = dicop_emoji[reaction.emoji][0]
-                        print(reaction.emoji, victime_name)
-                        await reaction.message.channel.send("{} a été séléctionné en tant que cible du Noctambule".format(str(victime_name)))
-
-                    elif step == 'Servante':
-                        print("reaction servante")
-                        devo_name = dicop_emoji[reaction.emoji][0]
-                        print(reaction.emoji, devo_name)
-                        await reaction.message.channel.send("{} a été séléctionné en tant que cible de la Servante Dévouée".format(str(devo_name)))
-
-            elif step == 'Imposteur':
-                print("reaction imposteur")
-                pimp = Lp[dicomembers[imposteur_name]]
-                roleimp = dicoimp[reaction.emoji]
-                await imposteur_name.send("Le rôle choisi est **{}**".format(roleimp))
-                await channels[0].send("L'Imposteur a choisi le rôle **{}**".format(roleimp))
-
-                annoncef.append("\n L'imposteur ({0.name}) a choisi le rôle **{1}**".format(imposteur_name, roleimp))
-
-                if roleimp in dicoroles:
-                    await channels[dicoroles[roleimp]].set_permissions(imposteur_name, overwrite=can_talk)
-                    if roleimp in liste_LG:
-                        Lp[dicomembers[imposteur_name]][10] = 'LG'
-                        if roleimp == 'LGB' or roleimp == 'Infect':
-                            await channels[8].set_permissions(imposteur_name, overwrite=can_talk)
-                await reaction.message.delete()
-
-                Lp[dicomembers[imposteur_name]][11] = roleimp
-
-            elif reaction.emoji in emojis_action:
-                
-                if step == "Menu":
-
-                    # C'est moche mais comment je fais autrement....
-
-                    if reaction.emoji == "❤️":
-                        await cupidon_panel(reaction.message)
-
-                    elif reaction.emoji == "🧒":
-                        await enfant_panel(reaction.message)
-
-                    elif reaction.emoji == "🕵️":
-                        await voleur_panel(reaction.message)
-
-                    elif reaction.emoji == "🐺":
-                        await infect_panel(reaction.message)
-                        
-                    elif reaction.emoji == "🎺":
-                        await charm_panel(reaction.message)
-
-                    elif reaction.emoji == "👒":
-                        await servante_panel(reaction.message)
-
-                    elif reaction.emoji == "💤":
-                        await noctambule_panel(reaction.message)
-
-                    elif reaction.emoji == "🔪":
-                        await kill_panel(reaction.message)
-
-                    elif reaction.emoji == "🔇":
-                        await mute(reaction.message, "mute")
-
-                    elif reaction.emoji == "🔊":
-                        await mute(reaction.message, "unmute")
-
-                    elif reaction.emoji == "🌙":
-                        await jour(reaction.message, "nuit")
-
-                    elif reaction.emoji == "🌞":
-                        await jour(reaction.message, "jour")
-
-                    elif reaction.emoji == "🛑":
-                        await reset_panel(reaction.message)
-
-                    elif reaction.emoji == "📔":
-                        await vote_panel(reaction.message)
-
-                    await reaction.message.delete()
-
-            else:
-                if step == "help":
-                    pass
-                else:
-                    await reaction.message.remove_reaction(reaction, user)
-
-
-        # Ancien système de vote 
-        """
-        elif step == 'Vote':
-            print('ok reaction mp vote')
-            if reaction.emoji in dicop_emoji:
-                await user.send("Vous avez voté pour {}".format(dicop_emoji[reaction.emoji][0]))
-                await channels[0].send("__{}__ a voté pour **{}**".format(user, dicop_emoji[reaction.emoji][0]))
-                Lannonce_vote.append("<@{}> a voté pour <@{}>".format(user.id, dicop_emoji[reaction.emoji][0]))
-            else:
-                await user.send("Vous avez voté blanc")
-                await channels[0].send("__{}__ a voté **blanc**".format(user))
-                Lannonce_vote.append("<@{}> a voté **blanc**".format(user.id))
-
-            await reaction.message.delete()
-        """
-
-    else:
-
-        if reaction.emoji == "1️⃣":
-            await manage_help(reaction.message, 1, user)
-        elif reaction.emoji == "2️⃣":
-            await manage_help(reaction.message, 2, user)
-        elif reaction.emoji == "3️⃣":
-            await manage_help(reaction.message, 3, user)
-        elif reaction.emoji == "❌":
-            await reaction.message.delete()
-
-        elif game_started == True:
-            await reaction.message.remove_reaction(reaction, user)
-
-
-# ==========================================================================================================================================================
-
-
-@client.event
-async def on_reaction_remove(reaction,user):
-
-    global id_panel, step, cpt_reaction, liste_couple, enfant_name, Lp, maitre_name, stolen_name, infect_name, killed_name, voleur_name, panel_author, victime_name, liste_charm, devo_name
-
-    r_msg = reaction.message.id
-
-    if user.bot:
-        pass
-    else:
-        print('removed reaction')
-        if (r_msg == id_panel) and (reaction.emoji in dicop_emoji):
-
-            if reaction.emoji == '✅':
-                pass
-
-            else:
-                cpt_reaction -= 1
-                if step == 'Cupidon':
-                    await reaction.message.channel.send("{} a été retiré de la liste des amants.".format(dicop_emoji[reaction.emoji][0]))
-                    liste_couple.remove(dicop_emoji[reaction.emoji][0])
-
-                elif step == 'Enfant':
-                    await reaction.message.channel.send("{} n'est plus séléctionné.".format(maitre_name))
-                    maitre_name = None
-
-                elif step == 'Voleur':
-                    await reaction.message.channel.send("{} n'est plus séléctionné.".format(stolen_name))
-                    stolen_name = None
-
-                elif step == 'Infecté':
-                    await reaction.message.channel.send("{} n'est plus séléctionné.".format(infect_name))
-                    infect_name = None
-
-                elif step == 'Charmé':
-                    await reaction.message.channel.send("{} n'est plus séléctionné.".format(dicop_emoji[reaction.emoji][0]))
-                    liste_charm.remove(dicop_emoji[reaction.emoji][0])
-
-                elif step == 'Kill':
-                    await reaction.message.channel.send("{} n'est plus séléctionné.".format(killed_name))
-                    killed_name = None
-
-                elif step == 'Noctambule':
-                    await reaction.message.channel.send("{} n'est plus séléctionné.".format(victime_name))
-                    victime_name = None
-
-                elif step == 'Servante':
-                    await reaction.message.channel.send("{} n'est plus séléctionné.".format(devo_name))
-                    devo_name = None
-
-
-# ==========================================================================================================================================================
-
 @client.command()
 async def help(ctx):
 #Commande d'aide utilisateur
 #Affiche un embed
 
-    global page, embed1, embed2, embed3, dico_embed, step, id_panel, cr_commands
+    global page, embed1, embed2, embed3, dico_embed, cr_commands
 
     page = 1
 
@@ -755,19 +300,6 @@ async def help(ctx):
     embed1.set_footer(
         text = 'Page 1/3 • {0.name}'.format(author)
     )
-
-    # rea1 = await author.send(embed=embed1)
-    # await ctx.channel.send("<@{0.id}> Le menu d'aide vous a été envoyé en message privé.".format(author))
-
-    """
-    rea1 = await ctx.channel.send(embed = embed1)
-    await rea1.add_reaction("1️⃣")
-    await rea1.add_reaction("2️⃣")
-    await rea1.add_reaction("3️⃣")
-    await rea1.add_reaction("❌")
-    """
-    # Help menu page scrolling stuff, will probably never use
-
 
     embed2 = discord.Embed(
         colour = discord.Color.dark_blue(),
@@ -835,37 +367,6 @@ async def help(ctx):
     await author.send(embed=embed3)
 
 
-    dico_embed = {
-        1: embed1,
-        2: embed2,
-        3: embed3
-    }
-
-    # id_panel = rea1.id
-
-
-async def manage_help(ctx, nb, user):
-
-    # Pour scroller les pages du menu help
-    # Je vais probablement jamais utiliser ça
-
-    global page, step, id_panel
-
-    page = nb
-
-    await ctx.delete()
-
-    # reaem = await user.send(embed = dico_embed[page])
-    reaem = await ctx.channel.send(embed = dico_embed[page])
-    await reaem.add_reaction("1️⃣")
-    await reaem.add_reaction("2️⃣")
-    await reaem.add_reaction("3️⃣")
-    await reaem.add_reaction("❌")
-
-    id_panel = reaem.id
-    
-
-
 # ==========================================================================================================================================================
 
 
@@ -883,27 +384,11 @@ async def test(ctx):
 
 @client.command()
 @commands.has_any_role("Maître du Jeu")
-async def info(ctx):
-    global is_info
-
-    if is_info == True:
-        is_info = False
-        await ctx.channel.send("Le bot n'affichera pas les informations de la partie.")
-    else:
-        is_info = True
-        await ctx.channel.send("Le bot affichera les informations de la partie.")
-
-
-# ==========================================================================================================================================================
-
-
-
-@client.command()
-@commands.has_any_role("Maître du Jeu")
 async def setup(ctx):
 
-    global channels, in_game, is_channels, text_channel_list, cant_talk, inscription_chan
+    global channels, in_game, is_channels, cant_talk, mdj
     author = ctx.author
+    mdj = author
     print("Commande .setup exécutée à {} par {}.".format(datetime.now().strftime("%H:%M:%S"), author))
 
 
@@ -944,28 +429,12 @@ async def setup(ctx):
         
     if in_game == False:
 
-        overwrites_inscription = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, mention_everyone=False, attach_files=False, embed_links=False)
-        }
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False, read_message_history=False, mention_everyone=False, attach_files=False, embed_links=False)
         }
         overwrites_pdv = {
             guild.default_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, read_message_history=True, mention_everyone=False, attach_files=False, embed_links=False)
         }
-
-        """
-        if "inscription" not in text_channel_list:
-            await guild.create_text_channel("inscription", category=category, overwrites=overwrites_pdv, topic="Les inscriptions se font ici.")
-
-        inscription_chan = client.get_channel((discord.utils.get(guild.text_channels, name="inscription")).id)
-        await inscription_chan.purge(limit=50)
-        await inscription_chan.send("**Règles pour l'inscription:**")
-        await inscription_chan.send("Pour vous inscrire vous devrez poster une emote discord (pas d'emote custom). Le bot vous préviendra si l'emote est déjà utilisée. Vous n'avez pas besoin de retenir votre emote, elle ne sert que au MDJ.")
-        banned_emoji = ['✅','❌','❎','⬜','🌫️','◻️','▫️','◽','🥇','🥈']
-        listToStr = ' '.join([str(elem) for elem in banned_emoji])
-        await inscription_chan.send("Emojis bannis: {}".format(listToStr)) 
-        """
 
         for i in range(0,30):
 
@@ -984,7 +453,7 @@ async def setup(ctx):
             except:
                 pass
     
-    channels = [client.get_channel(id) for id in channels]
+    channels = [client.get_channel(idc) for idc in channels]
     print(channels)
 
     await channels[0].send("Setup terminé.")
@@ -1071,7 +540,7 @@ async def hcreate(ctx):
 async def create(ctx, strRole, compo):
 #Permet de créer une liste de rôles pour 1 partie
 
-    global Lroles_dispo, Lroles_voleur, Lroles_traitre, in_game, is_channels, is_compo, inscription_chan, cr_commands, file_token, cr_actions
+    global Lroles_dispo, in_game, is_compo, cr_commands, file_token, cr_actions
 
     print("Commande .create exécutée à {} par {}.".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
 
@@ -1114,7 +583,6 @@ async def create(ctx, strRole, compo):
             
 
         if check_compo == True:
-            Lroles_voleur = []
             Lroles_dispo = []
             Lroles = strRole.split(',')
             for role in Lroles:
@@ -1132,8 +600,6 @@ async def create(ctx, strRole, compo):
                     cr_commands.append("[{}] Erreur (commande .create): Un rôle n'était pas valide. Rôle non valide: {}".format(datetime.now().strftime("%H:%M:%S"), role))
                     
                     Lroles_dispo = []
-                    Lroles_voleur = []
-                    Lroles_traitre = []
                     check_compo = False
                     break
             
@@ -1143,50 +609,25 @@ async def create(ctx, strRole, compo):
             if ('Voleur' in Lroles_dispo and 'Sectaire' in Lroles_dispo) or ('Voleur' in Lroles_dispo and 'JDF' in Lroles_dispo) or ('Voleur' in Lroles_dispo and 'Imposteur' in Lroles_dispo) or ('Voleur' in Lroles_dispo and 'Traitre' in Lroles_dispo) or ('Voleur' in Lroles_dispo and is_compo == False):
                 await ctx.channel.send("Impossible d'avoir un Voleur si il y a un Abominable Sectaire / Joueur de Flûte / Imposteur / Traître dans la partie, ou si la composition est cachée. Veuillez créer un autre composition.")
                 Lroles_dispo = []
-                Lroles_voleur = []
-                Lroles_traitre = []
                 check_compo = False
 
             if ('Imposteur' in Lroles_dispo and 'Traitre' in Lroles_dispo):
                 await ctx.channel.send("Impossible d'avoir un Imposteur et un Traître dans la même partie.")
                 Lroles_dispo = []
-                Lroles_voleur = []
-                Lroles_traitre = []
                 check_compo = False
             
             if Lroles_dispo.count('Sectaire') > 1:
                 await ctx.channel.send("Impossible d'avoir plusieurs sectaires dans la même partie.")
                 Lroles_dispo = []
-                Lroles_voleur = []
-                Lroles_traitre = []
                 check_compo = False
 
 
             if 'Chaperon' in Lroles_dispo and 'Chasseur' not in Lroles_dispo:
                 await ctx.channel.send("Impossible d'avoir un Chaperon Rouge sans Chasseur")
                 Lroles_dispo = []
-                Lroles_voleur = []
-                Lroles_traitre = []
                 check_compo = False
       
         if check_compo == True:   
-            if 'Imposteur' in Lroles_dispo:
-                for role in liste_roles:
-                    banned_roles = ['Traitre', 'Sectaire', 'Chasseur', 'Soeur', 'Frère', 'Voleur', 'Cupidon', 'Enfant']
-                    if role in Lroles_dispo or role in banned_roles or (role == 'Chaperon' and 'Chasseur' not in Lroles_dispo):
-                        pass
-                    else:
-                        Lroles_voleur.append(role)
-                print(Lroles_voleur)
-                
-            if 'Traitre' in Lroles_dispo:
-                for role in liste_roles:
-                    banned_roles = ['Traitre', 'Sectaire', 'Chasseur', 'Soeur', 'Frère', 'Voleur', 'Cupidon', 'Enfant']
-                    if role in liste_village and (role in Lroles_dispo or role in banned_roles):
-                        pass
-                    else:
-                        Lroles_traitre.append(role) 
-                print(Lroles_traitre)
 
             if len(Lroles_dispo) != 0:
 
@@ -1280,7 +721,7 @@ async def create(ctx, strRole, compo):
 async def inscription(ctx, action):
     # Permet d'inscrire automatiquement tout le monde à la partie.
 
-    global is_channels, inscription_chan, dicop_name_to_emoji, dicop_id_to_emoji, dicop_emoji, Lemojis, cr_commands
+    global is_channels, dicop_name_to_emoji, dicop_id_to_emoji, dicop_emoji, cr_commands
 
     print("Commande .inscription {} exécutée à {} par {}.".format(action, datetime.now().strftime("%H:%M:%S"), ctx.author))
 
@@ -1315,24 +756,8 @@ async def inscription(ctx, action):
 
             if in_game == True:
 
-                L_j_temp = [k for k in members]
-                Lj = []
-                L_j_tempstr = [str(k) for k in members]
-                recap = []
-
-                pprint(L_j_tempstr)
-
-                for member in L_j_temp:
-                    print(member)
-                    if member in dicop_name_to_emoji:
-                        print("déjà inscrit enlevé {}".format(member))
-                        recap.append("``{}``: {} \n".format(member, dicop_name_to_emoji[member]))
-                    elif str(member) == str(author):
-                        print("author enlevé {}".format(member))
-                    else:
-                        Lj.append(member)
-                
-                print("ok ljtemp")
+                Lj = [member for member in members if member not in dicop_name_to_emoji and str(member) != str(author)]
+                recap = ["``{}``: {} \n".format(member, dicop_name_to_emoji[member]) for member in members if member in dicop_name_to_emoji]
                     
                 if action == "create":
 
@@ -1363,13 +788,10 @@ async def inscription(ctx, action):
 
                     for member in Lj:
 
-                        # await inscription_chan.set_permissions(member, overwrite=cant_talk)
                         await channels[1].set_permissions(member, overwrite=can_see)
                         await channels[2].set_permissions(member, overwrite=can_talk)
                         print(member)
                         if str(member) != str(author):
-                            L_joueurs.append(member)
-                            #Liste des joueurs que l'on va réutiliser 
 
                             for i in range(3,30):
                                 await channels[i].set_permissions(member, overwrite=cant_talk)
@@ -1385,7 +807,6 @@ async def inscription(ctx, action):
                         dicop_id_to_emoji[member.id] = emoji_p
                         dicop_emoji[emoji_p] = [member,member.id]
                         dicop_name_to_emoji[member] = emoji_p
-                        Lemojis.append(emoji_p)
 
                         await member.add_roles(get(member.guild.roles, name="Joueurs Thiercelieux"))
 
@@ -1432,7 +853,6 @@ async def inscription(ctx, action):
                         dicop_id_to_emoji = {}
                         dicop_name_to_emoji = {}
                         dicop_emoji = {}
-                        Lemojis = []
 
                         await ctx.channel.send("La liste des inscriptions a été réinitialisée.")
                     
@@ -1474,7 +894,7 @@ async def inscription(ctx, action):
 @commands.has_any_role("Maître du Jeu")
 async def remove(ctx, *, member):
 
-    global dicop_name_to_emoji, dicop_id_to_emoji, dicop_emoji, Lemojis
+    global dicop_name_to_emoji, dicop_id_to_emoji, dicop_emoji
 
     member_name, member_discriminator = member.split('#')
 
@@ -1641,19 +1061,18 @@ async def roles(ctx):
 # ==========================================================================================================================================================
 
 
-
-
 @client.command()
 @commands.has_any_role("Maître du Jeu")
 async def start(ctx, state_couple):
 #Commande de départ
 
-    global cr_commands, mdj, annoncef, Lroles_dispo, Lroles_voleur, L_joueurs, dicoimp, in_game, game_started, channels, Lp, dicopmembers ,can_talk, cant_talk, is_compo, mdj, is_info, panel_author, step, id_panel, imposteur_name, cr_chat
+    global cr_commands, cr_chat, mdj, game_started, Lp
     
     print("[{}] Commande .start {} exécutée par {}".format(datetime.now().strftime("%H:%M:%S"), state_couple, ctx.author))
 
     cr_commands.append("[{}] Commande .start {} exécutée par {}. \n \n".format(datetime.now().strftime("%H:%M:%S"), state_couple, ctx.author))
 
+    annoncef = []
     is_sect = False
     ecolour = discord.Color.red()
 
@@ -1740,10 +1159,6 @@ async def start(ctx, state_couple):
 
         start_time = time.time()
 
-        panel_author = ctx.author
-        
-        Lroles_final = []
-        #Liste de transition (voir + bas)
 
         await channels[1].purge(limit=50)
         await channels[2].purge(limit=50)
@@ -1762,18 +1177,8 @@ async def start(ctx, state_couple):
                 colour = discord.Color.from_rgb(50,50,50)
             )
         
-            Laff = []
-            for i in range(0,len(Lroles_dispo)):
-                if Lroles_dispo[i] not in Lroles_final:
-                    if Lroles_dispo[i] in trad_roles:
-                        Laff.append("``{}`` ({}) \n".format(trad_roles[Lroles_dispo[i]],Lroles_dispo.count(Lroles_dispo[i])))
-                    else:
-                        Laff.append("``{}`` ({}) \n".format(Lroles_dispo[i],Lroles_dispo.count(Lroles_dispo[i])))
-                    Lroles_final.append(Lroles_dispo[i])
-                elif Lroles_dispo[i] in Lroles_final:
-                    Lroles_final.append(Lroles_dispo[i])
-
-
+            Lroles_final = list(dict.fromkeys(Lroles_dispo))
+            Laff = ["``{}`` ({}) \n".format(trad_roles[k], Lroles_dispo.count(k)) if k in trad_roles else "``{}`` ({}) \n".format(k, Lroles_dispo.count(k)) for k in Lroles_final]
 
 
             if state_couple == "couple" or state_couple == "Couple":
@@ -1796,15 +1201,6 @@ async def start(ctx, state_couple):
 
             await channels[1].send(embed=embedaf)
 
-
-
-        if is_info == True:
-            text_to_say = ["**Récapitulatif du déroulement de la partie:**","- Chaque nuit, les loup-garous vont devoir éliminer un joueur de leur choix.","- D'autres actions peuvent se produire en fonction des différents rôles.","- La composition de la partie est accessible dans le salon rôles de la game","- Durant la nuit, les loup-garous peuvent parler entre eux mais le couple ne peut pas.","- Durant le jour, c'est l'inverse.","- A chaque jour, le village devra éliminer un joueur par le vote.","- En cas d'égalité, un vote est refait parmis les villageois qui n'ont pas voter pour les cibles étant à égalité.","- Il est bien sûr déconseillé de parler dans ce channel pendant la nuit.","- Les morts seront annoncées dans ce channel.","- Pour toute question concernant votre rôle ou tout problème, n'hésitez pas à envoyer un message privé au maître du jeu.","- Vos rôles vont être distribués chacun son tour. Pas la peine de demander pourquoi vous n'avez pas eu votre rôle."]
-            for txt in text_to_say:
-                await channels[2].send(txt)
-            await channels[2].send("- Le maître du jeu est **{}**. Bon jeu !".format(str(author)))
-
-
         await ctx.channel.send("**Le maître de jeu est** {}.".format(author))
         await ctx.channel.send("**Les partcipants sont: **")
 
@@ -1813,6 +1209,7 @@ async def start(ctx, state_couple):
         cr_chat.append("[{}] Début de l'enregistrement des messages des channels. \n \n".format(datetime.now().strftime("%H:%M:%S")))
 
         Lroles_game = [k for k in Lroles_dispo]
+        # Distribution des rôles
 
         for member in members:
         #Grosse boucle qui permet d'initialiser l'état des joueurs
@@ -1909,18 +1306,17 @@ async def start(ctx, state_couple):
 
 
         if 'Traitre' in Lroles_dispo:
-
+            
+            Lroles_traitre = [k for k in liste_roles if (k in liste_village and k not in Lroles_dispo)]
             print(Lroles_traitre)
             role_traitre = rdm.choice(Lroles_traitre)
 
+            argr = role_traitre
             if role_traitre in trad_roles:
-                await membertraitre.send("Le rôle qui vous a été atribué est: {}".format(trad_roles[role_traitre]))
-                await ctx.channel.send("Le Traître **({})** a le rôle __{}__.".format(membertraitre,trad_roles[role_traitre]))
-                annoncef.append("\n Le traître (``{0.name}``) a le rôle {1} \n".format(membertraitre, trad_roles[role_traitre]))
-            else:
-                await membertraitre.send("Le rôle qui vous a été atribué est: {}".format(role_traitre))
-                await ctx.channel.send("Le Traître **({})** a le rôle __{}__.".format(membertraitre,role_traitre))
-                annoncef.append("\n Le traître (``{0.name}``) a le rôle {1} \n".format(membertraitre, role_traitre))
+                argr = trad_roles[role_traitre]
+            await membertraitre.send("Le rôle qui vous a été atribué est: **{}**".format(argr))
+            await ctx.channel.send("Le Traître **({})** a le rôle __{}__.".format(membertraitre, argr))
+            annoncef.append("\n Le traître (``{0.name}``) a le rôle {1} \n".format(membertraitre, argr))
 
             if role_traitre in dicoroles:
                 await channels[dicoroles[role_traitre]].set_permissions(member, overwrite=can_talk)
@@ -1928,20 +1324,12 @@ async def start(ctx, state_couple):
             Lp[dicomembers[membertraitre]][12] = role_traitre
 
 
-        
         if 'Imposteur' in Lroles_dispo:
 
-            print('Imposteur')
+            Lroles_imp = [k for k in liste_roles if (k not in Lroles_dispo) or (k == 'Jaloux' and state_couple == 'couple')]
 
-            Lrtemp = [k for k in Lroles_voleur]
-            for role in Lrtemp:
-                if (role == 'Jaloux' and state_couple == 'non'):
-                    Lrtemp.remove(role)
-                    break
-
-            Lrimp = rdm.sample(Lrtemp, 2)
-            role_imp1 = Lrimp[0]
-            role_imp2 = Lrimp[1]
+            Lrimp = rdm.sample(Lroles_imp, 2)
+            role_imp1,role_imp2 = Lrimp[0],Lrimp[1]
 
             print(role_imp1,role_imp2)
 
@@ -1951,35 +1339,54 @@ async def start(ctx, state_couple):
 
             print('création panel')
 
-            if role_imp1 in trad_roles:
-                await memberimp.send("Réagissez à '🥇' pour choisir le rôle **__{}__**".format(trad_roles[role_imp1]))
-            else:
-                await memberimp.send("Réagissez à '🥇' pour choisir le rôle **__{}__**".format(role_imp1))
+            dicoimp = {}
             dicoimp['🥇'] = role_imp1
-            print('role 1 ok')
-
-            if role_imp2 in trad_roles:
-                await memberimp.send("Réagissez à '🥈' pour choisir le rôle **__{}__**".format(trad_roles[role_imp2]))
-            else:
-                await memberimp.send("Réagissez à '🥈' pour choisir le rôle **__{}__**".format(role_imp2))
             dicoimp['🥈'] = role_imp2
-            print('role 2 ok')
+
+            arg1 = role_imp1
+            arg2 = role_imp2
+            if role_imp1 in trad_roles:
+                arg1 = trad_roles[role_imp1]
+            if role_imp2 in trad_roles:
+                arg2 = trad_roles[role_imp2]
 
             embed_panel.set_author(name = "Panel de choix Imposteur")
-            embed_panel.add_field(name ="Choix de l'imposteur", value = "Réagissez à l'émoji correspondant", inline = False)
+            embed_panel.add_field(
+                name ="Choix de l'imposteur", 
+                value = "Vous avez **30 secondes** pour choisir un rôle, sinon il vous sera attribué aléatoirement. \nRéagissez à '🥇' pour choisir le rôle **__{}__**. \nRéagissez à '🥈' pour choisir le rôle **__{}__**."format(arg1,arg2), 
+                inline = False
+            )
             current_panel = await memberimp.send(embed=embed_panel)
 
             await current_panel.add_reaction('🥇')
             await current_panel.add_reaction('🥈')
             
-            print("send ok")
+            def checkImp(reaction, user):
+                return (user == memberimp) and (str(reaction.emoji) == '🥇' or str(reaction.emoji) == '🥈') and (reaction.message.id == current_panel.id)
 
-            imposteur_name = memberimp
-            id_panel = current_panel.id
-            step = "Imposteur"
-
-            print(dicoimp)
-            print(step)
+            try:
+                reaction, user = await client.wait_for("reaction_add", check=checkImp, timeout=30.0)
+                roleimp = dicoimp[reaction.emoji]
+                argrole = roleimp
+                if roleimp in trad_roles:
+                    argrole = trad_roles[roleimp]
+                await memberimp.send("Vous avez choisi le rôle **{}**".format(argrole))
+            except asyncio.TimeoutError:
+                roleimp = rdm.choice(list(dicoimp.values()))
+                argrole = roleimp
+                if roleimp in trad_roles:
+                    argrole = trad_roles[roleimp]
+                await memberimp.send("Vous n'avez pas répondu à temps un rôle vous a été attribué au hasard. Votre rôle est: **{}**".format(argrole))
+            finally:
+                await channels[0].send("L'Imposteur a choisi le rôle **{}**".format(roleimp))
+                annoncef.append("\n L'imposteur ({0.name}) a choisi le rôle **{1}**".format(memberimp, roleimp))
+                if roleimp in dicoroles:
+                    await channels[dicoroles[roleimp]].set_permissions(memberimp, overwrite=can_talk)
+                    if roleimp in liste_LG:
+                        Lp[dicomembers[memberimp]][10] = 'LG'
+                        if roleimp == 'LGB' or roleimp == 'Infect':
+                            await channels[8].set_permissions(memberimp, overwrite=can_talk)
+                await reaction.message.delete()
 
 
         if "Sectaire" in Lroles_dispo:
@@ -1999,24 +1406,41 @@ async def start(ctx, state_couple):
                     Ltemps.pop(irdm)
                     Lp[irdm][8] = "Secte"
             
-            str_s = ''
-            for member in sect:
-                str_s = str_s + str(member) + ', '
-            str_s = str_s[:-2]
-            await ctx.channel.send("Liste des joueurs à tuer pour le sectaire: **{}**.".format(str_s))
-            await membersect.send("Liste des joueurs à tuer: {}.".format(str_s))
+            await ctx.channel.send("Liste des joueurs à tuer pour le sectaire: **{}**.".format(', '.join(sect)))
+            await membersect.send("Liste des joueurs à tuer: {}.".format(', '.join(sect)))
 
             annoncef.append("\n Liste des membres à tuer pour le Sectaire: ``{}`` \n".format(', '.join(sect)))
             
 
         print(Lp)
         temps1 = (time.time() - start_time)
-        await ctx.channel.send("Commande exécutée en {} secondes".format(temps1))
-        await ctx.channel.send("Lancement de la game terminé.") 
-
+        # await ctx.channel.send("Commande exécutée en {} secondes".format(temps1))
 
         if state_couple == 'couple':
-            await couple(ctx)
+
+            L = [k for k in members if str(k) != str(author) or str(Lp[dicomembers[k]][1]) != 'Jaloux']
+            
+            i1 = rdm.randint(0,len(L)-1)
+            if str(L[i1]) != author:
+                amant1 = L[i1]
+                Lp[dicomembers[L[i1]]][4] = 'Oui'
+                L.pop(i1)
+
+            i2 = rdm.randint(0,len(L)-1)
+            if str(L[i2]) != author:
+                amant2 = L[i2]
+                Lp[dicomembers[L[i2]]][4] = 'Oui'
+                L.pop(i2)
+
+            await channels[6].set_permissions(amant1, overwrite=can_see)
+            await channels[6].set_permissions(amant2, overwrite=can_see)
+            await amant1.send("Tu es en couple avec {}".format(amant2))
+            await amant2.send("Tu es en couple avec {}".format(amant1))
+            print("Amant 1: {}, Amant 2: {}".format(amant1,amant2))
+            await ctx.channel.send("Amant 1: {}, Amant 2: {}".format(amant1,amant2))
+
+            annoncef.append("\n❤️ Les amants sont: ``{0.name}`` et ``{1.name}``".format(amant1, amant2))
+
 
         embed = discord.Embed(
             colour = discord.Color.gold(),
@@ -2032,10 +1456,9 @@ async def start(ctx, state_couple):
             icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
         )
         
+        await ctx.channel.send("Lancement de la partie terminé.")
         await ctx.channel.send(embed=embed)
-
         game_started = True
-
         await menu(ctx)
 
     
@@ -2068,16 +1491,11 @@ async def start(ctx, state_couple):
 @client.command()
 @commands.has_any_role("Maître du Jeu")
 async def fmenu(ctx):
-
     await menu(ctx)
 
 # Commande pour forcer l'apparition du menu en cas de bug
 
-
-
 async def menu(ctx):
-
-    global emojis_action, id_panel, step, game_started
 
     panel = discord.Embed(
             colour = discord.Color.green()
@@ -2085,8 +1503,7 @@ async def menu(ctx):
 
     emojis_action = ["🐺", "🔪", "👒", "🔇", "🔊", "🌙", "🧒", "❤️", "💤", "🕵️", "🎺", "🌞","🛑","📔"]
 
-
-    if game_started == False:
+    if game_started == True:    # ATTENTION NE PAS OUBLIER DE CHANGER EN FALSE
 
         await ctx.channel.send("La partie n'a pas encore commencé. Le menu n'est pas encore disponible.")
 
@@ -2151,6 +1568,7 @@ async def menu(ctx):
             await msg.add_reaction("🌙")
             await msg.add_reaction("📔")
             await msg.add_reaction("🛑")
+
         
         else:
             panel.set_author(
@@ -2207,8 +1625,55 @@ async def menu(ctx):
                 await msg.add_reaction("🎺")
             await msg.add_reaction("🌞")
 
-        id_panel = msg.id
-        step = 'Menu'
+        def checkMenu(reaction, user):
+            return (user == mdj) and (reaction.message.id == msg.id) and (str(reaction.emoji) in emojis_action)
+        
+        reaction, user = await client.wait_for("reaction_add", check=checkMenu)
+        await reaction.message.delete()
+        if reaction.emoji == "❤️":
+            await cupidon_panel(reaction.message)
+
+        elif reaction.emoji == "🧒":
+            await enfant_panel(reaction.message)
+
+        elif reaction.emoji == "🕵️":
+            await voleur_panel(reaction.message)
+
+        elif reaction.emoji == "🐺":
+            await infect_panel(reaction.message)
+            
+        elif reaction.emoji == "🎺":
+            await charm_panel(reaction.message)
+
+        elif reaction.emoji == "👒":
+            await servante_panel(reaction.message)
+
+        elif reaction.emoji == "💤":
+            await noctambule_panel(reaction.message)
+
+        elif reaction.emoji == "🔪":
+            await kill_panel(reaction.message)
+
+        elif reaction.emoji == "🔇":
+            await mute(reaction.message, "mute")
+
+        elif reaction.emoji == "🔊":
+            await mute(reaction.message, "unmute")
+
+        elif reaction.emoji == "🌙":
+            await jour(reaction.message, "nuit")
+
+        elif reaction.emoji == "🌞":
+            await jour(reaction.message, "jour")
+
+        elif reaction.emoji == "🛑":
+            await reset_panel(reaction.message)
+
+        elif reaction.emoji == "📔":
+            await vote_panel(reaction.message)
+
+
+
 
 
 
@@ -2219,15 +1684,12 @@ async def menu(ctx):
 
 async def jour(ctx, dtime):
 
-    global dicoroles, Lp, can_talk, cant_talk, game_started, channels, L_joueurs, day, dicomembers, cpt_jour
+    global Lp, day, cpt_jour
 
     author = mdj
 
     channel = author.voice.channel
     members = channel.members
-
-    L_j_temp = [k for k in members]
-    #Copie de members
 
     is_cover = False
     is_devin = False
@@ -2242,16 +1704,7 @@ async def jour(ctx, dtime):
         icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
     )
 
-    Lmembers = [k for k in L_joueurs]
-
     if game_started == True:
-
-        for i in range(0,len(L_j_temp)):
-            if str(L_j_temp[i]) == str(author):
-                L_j_temp.pop(i)
-                break
-    
-        
 
         if dtime == 'nuit':
 
@@ -2259,58 +1712,46 @@ async def jour(ctx, dtime):
                 cpt_jour += 1
 
                 day = False
+         
+                for member in dicomembers:
 
-                for member in L_j_temp:
                     await member.edit(mute=True)
                     await channels[2].set_permissions(member, overwrite=can_see) 
-         
-                for member in Lmembers:
 
-                    if member in dicop_name_to_emoji:
-
-                        fiche_player = Lp[dicomembers[member]]
-                        rolep = fiche_player[1]
-                        print(member,rolep)
-                        if str(rolep) == 'Mort':
-                            pass
-                        else:
-                            rol = Lp[dicomembers[member]][1]
-                            statusc = Lp[dicomembers[member]][4]
-                            status_infect = Lp[dicomembers[member]][9]
-                            status_impost = Lp[dicomembers[member]][10]
-                            
-                            if rol == 'LG' or rol == 'LGB' or rol == 'IPDL' or rol == 'LGA' or (rol == 'Enfant' and is_enfant == True) or status_infect == 'Infecté' or (rol == 'Imposteur' and status_impost == 'LG'):
-                                await channels[8].set_permissions(member, overwrite=can_talk)
-                                print("{} OK a été demute de LG".format(str(member)))
-                            if statusc == 'Oui':
-                                await channels[6].set_permissions(member, overwrite=can_see)
-                                print("{} OK a été mute de couple".format(str(member)))
+                    rol = Lp[dicomembers[member]][1]
+                    statusc = Lp[dicomembers[member]][4]
+                    status_infect = Lp[dicomembers[member]][9]
+                    status_impost = Lp[dicomembers[member]][10]
+                    
+                    if rol == 'LG' or rol == 'LGB' or rol == 'IPDL' or rol == 'LGA' or (rol == 'Enfant' and is_enfant == True) or status_infect == 'Infecté' or (rol == 'Imposteur' and status_impost == 'LG'):
+                        await channels[8].set_permissions(member, overwrite=can_talk)
+                        print("{} OK a été demute de LG".format(str(member)))
+                    if statusc == 'Oui':
+                        await channels[6].set_permissions(member, overwrite=can_see)
+                        print("{} OK a été mute de couple".format(str(member)))
 
                 while is_cover == False:
                     if 'LGA' in Lroles_dispo:
-                        ind = rdm.randint(0,len(L_j_temp)-1)
-                        if Lp[dicomembers[L_j_temp[ind]]][1] == 'Mort':
-                            pass
-                        else:
-                            await channels[8].send("La couverture du LGA cette nuit est: {}.".format(Lp[dicomembers[L_j_temp[ind]]][1]))
-                            await channels[0].send("La couverture du LGA cette nuit est: {}.".format(Lp[dicomembers[L_j_temp[ind]]][1]))
-                            if cpt_jour == 1 and 'Oeil' in Lroles_dispo:
-                                await channels[23].send("La couverture du LGA cette nuit est: {}.".format(Lp[dicomembers[L_j_temp[ind]]][1]))
-                            is_cover = True
+                        imember = rdm.choice(list(dicomembers.values()))
+                        await channels[8].send("La couverture du LGA cette nuit est: {}.".format(Lp[dicomembers[imember]][1]))
+                        await channels[0].send("La couverture du LGA cette nuit est: {}.".format(Lp[dicomembers[imember]][1]))
+                        if cpt_jour == 1 and 'Oeil' in Lroles_dispo:
+                            await channels[23].send("La couverture du LGA cette nuit est: {}.".format(Lp[dicomembers[imember]][1]))
+                        is_cover = True
                     else:
-                        break 
+                        is_cover = True 
                 
 
                 while is_devin == False:
                     if "Devin" in Lroles_dispo:
-                        ind = rdm.randint(0,len(L_j_temp)-1)
-                        if Lp[dicomembers[L_j_temp[ind]]][1] == 'Mort' or Lp[dicomembers[L_j_temp[ind]]][1] == 'Devin':
+                        imember = rdm.choice(list(dicomembers.values()))
+                        if Lp[dicomembers[imember]][1] == 'Devin':
                             pass
                         else:
-                            await channels[29].send("Vous devez deviner le rôle de {}.".format(Lp[dicomembers[L_j_temp[ind]]][0]))
-                            await channels[0].send("Le Devin doit deviner le rôle de {} qui est {}.".format(Lp[dicomembers[L_j_temp[ind]]][0],Lp[dicomembers[L_j_temp[ind]]][1]))
+                            await channels[29].send("Vous devez deviner le rôle de {}.".format(str(imember)))
+                            await channels[0].send("Le Devin doit deviner le rôle de {} qui est {}.".format(str(imember),Lp[dicomembers[imember]][1]))
                             if cpt_jour == 1 and 'Oeil' in Lroles_dispo:
-                                await channels[23].send("Le devin doit deviner le rôle de {}.".format(Lp[dicomembers[L_j_temp[ind]]][0]))
+                                await channels[23].send("Le devin doit deviner le rôle de {}.".format(str(imember)))
                             is_devin = True
                     else:
                         break
@@ -2332,14 +1773,7 @@ async def jour(ctx, dtime):
 
                 await channels[2].send(embed=embedn)
 
-                Laffichage_day = []
-                for name in dicop_name_to_emoji:
-                    fiche_player = Lp[dicomembers[name]]
-                    rolep = fiche_player[1]
-                    if str(rolep) == 'Mort':
-                        pass
-                    else:
-                        Laffichage_day.append("``{0.name}``: {1} (Rôle: __{2}__) \n".format(name, dicop_name_to_emoji[name], rolep))
+                Laffichage_day = ["``{0.name}``: {1} (Rôle: __{2}__) \n".format(name, dicop_name_to_emoji[name], Lp[dicomembers[name]][1]) for name in dicop_name_to_emoji]
 
                 embed = discord.Embed(
                     title = "Informations partie",
@@ -2358,104 +1792,43 @@ async def jour(ctx, dtime):
 
                 await channels[0].send(embed=embed)
 
-                # ====== AFFICHAGE BILAN MDJ ====== #
-                
-                # Ordre de passage:
-                # Seulement tour 1: Cupidon, Enfant
-                # Salvateur, LG, IPDL, GML, LGB, Voyante, Renard, Sorcière, Corbeau, JDF, Confesseur, Voleur
-                Lannoncet1 = ["Cupidon", "Enfant"]
-                Lannonce = ["Salvateur", "LG", "IPDL", "GML", "LGB", "Voyante", "Renard", "Sorcière", "Corbeau", "JDF", "Confesseur", "Voleur"]
-                
-                """
-                await channels[0].send("Récapitulatif de ce qu'il y a à faire cette nuit:")
-
-                if cpt_jour == 1:
-                    await channels[0].send("__Rôles à ne faire que cette nuit (Cupidon dans #cupidon-et-couple et Enfant Sauvage par MP):__")
-                    for role in Lannoncet1:
-                        if role in Lroles_dispo:
-                            if role in trad_roles:
-                                await channels[0].send("**{}**".format(trad_roles[role]))
-                            else:
-                                await channels[0].send("**{}**".format(role))
-
-                anno_lga_infect = False
-                await channels[0].send("__Rôles à faire cette nuit:__")
-                for role in Lannonce:
-                    if role in Lroles_dispo:
-                        if (role == 'LGA' or role == 'IPDL') and ('LG' not in Lroles_dispo):
-                            if anno_lga_infect == False:
-                                await channels[0].send("**Loup-garous**")
-                                anno_lga_infect = True
-                        if role in trad_roles:
-                            await channels[0].send("**{}**".format(trad_roles[role]))
-                        else:
-                            await channels[0].send("**{}**".format(role))
-                """
-
-
-            else:
-                # Normalement ce cas de figure n'arrive jamais mais je le laisse là quand même...
-
-                embed.add_field(
-                    name ='.jour <jour/nuit>', 
-                    value = "Le temps est déjà la nuit ou l'argument rentré est erroné.", 
-                    inline = False
-                )
-
-                await ctx.channel.send("⚠️ **Erreur de commande** <@{}>".format(ctx.author.id))
-                await ctx.send(embed=embed)
-        
-
 
         if dtime == 'jour':
             if day == False:
  
                 day = True
-
-                for member in L_j_temp:
-                    if member in dicomembers:
-                        if Lp[dicomembers[member]][1] == 'Mort':
-                            pass
-                        else:
-                            await member.edit(mute=False)
-                            await channels[2].set_permissions(member, overwrite=can_talk)
                 
-                for member in Lmembers:
+                for member in dicomembers:
 
-                    if member in dicop_name_to_emoji:
+                    await member.edit(mute=False)
+                    await channels[2].set_permissions(member, overwrite=can_talk)
 
-                        fiche_player = Lp[dicomembers[member]]
-                        rolep = fiche_player[1]
-                        print(member,rolep)
-                        if str(rolep) == 'Mort':
-                            pass
-                        else:
-                            rol = Lp[dicomembers[member]][1]
-                            statusc = Lp[dicomembers[member]][4]
-                            status_infect = Lp[dicomembers[member]][9]
-                            status_impost = Lp[dicomembers[member]][10]
+                    rol = Lp[dicomembers[member]][1]
+                    statusc = Lp[dicomembers[member]][4]
+                    status_infect = Lp[dicomembers[member]][9]
+                    status_impost = Lp[dicomembers[member]][10]
 
-                            check_LG = False
-                            if rol == 'LG' or rol == 'LGB' or rol == 'IPDL' or rol == 'LGA' or (rol == 'Enfant' and is_enfant == True) or status_infect == 'Infecté' or (rol == 'Imposteur' and status_impost == 'LG'):
-                                check_LG = True
+                    check_LG = False
+                    if rol == 'LG' or rol == 'LGB' or rol == 'IPDL' or rol == 'LGA' or (rol == 'Enfant' and is_enfant == True) or status_infect == 'Infecté' or (rol == 'Imposteur' and status_impost == 'LG'):
+                        check_LG = True
 
-                            if check_LG == True:
-                                await channels[8].set_permissions(member, overwrite=can_see)
-                                print("{} OK a été mute de LG".format(str(member)))
-                            if rol == 'LGB' or rol == 'IPDL':
+                    if check_LG == True:
+                        await channels[8].set_permissions(member, overwrite=can_see)
+                        print("{} OK a été mute de LG".format(str(member)))
+                    if rol == 'LGB' or rol == 'IPDL':
+                        await channels[dicoroles[rol]].set_permissions(member, overwrite=can_talk)
+                        print("{} OK a été demute de LGB/IPDL (cas où noctambule)".format(str(member)))
+                    else: 
+                        if rol in dicoroles and check_LG == False:
+                            if rol == "PF" or rol == "Chaman" or rol == "Jaloux" or rol == "Oeil":
+                                await channels[dicoroles[rol]].set_permissions(member, overwrite=can_see)
+                            else:
                                 await channels[dicoroles[rol]].set_permissions(member, overwrite=can_talk)
-                                print("{} OK a été demute de LGB/IPDL (cas où noctambule)".format(str(member)))
-                            else: 
-                                if rol in dicoroles and check_LG == False:
-                                    if rol == "PF" or rol == "Chaman" or rol == "Jaloux" or rol == "Oeil":
-                                        await channels[dicoroles[rol]].set_permissions(member, overwrite=can_see)
-                                    else:
-                                        await channels[dicoroles[rol]].set_permissions(member, overwrite=can_talk)
-                                    print("{} OK a été demute de {} (cas où noctambule)".format(member, channels[dicoroles[rol]]))
+                            print("{} OK a été demute de {} (cas où noctambule)".format(member, channels[dicoroles[rol]]))
 
-                            if statusc == 'Oui':
-                                await channels[6].set_permissions(member, overwrite=can_talk)
-                                print("{} OK a été demute de couple".format(str(member)))
+                    if statusc == 'Oui':
+                        await channels[6].set_permissions(member, overwrite=can_talk)
+                        print("{} OK a été demute de couple".format(str(member)))
 
 
                 embedj = discord.Embed(
@@ -2475,14 +1848,7 @@ async def jour(ctx, dtime):
 
                 await channels[2].send(embed=embedj)
 
-                Laffichage_day = []
-                for name in dicop_name_to_emoji:
-                    fiche_player = Lp[dicomembers[name]]
-                    rolep = fiche_player[1]
-                    if str(rolep) == 'Mort':
-                        pass
-                    else:
-                        Laffichage_day.append("``{0.name}``: {1} (Rôle: __{2}__) \n".format(name, dicop_name_to_emoji[name], rolep))
+                Laffichage_day = ["``{0.name}``: {1} (Rôle: __{2}__) \n".format(name, dicop_name_to_emoji[name], Lp[dicomembers[name]][1]) for name in dicop_name_to_emoji]
 
                 embed = discord.Embed(
                     title = "Informations partie",
@@ -2501,74 +1867,7 @@ async def jour(ctx, dtime):
 
                 await channels[0].send(embed=embed)
 
-
-    # Les 2 prochains cas n'arrivent jamais mais je les laisse au cas où je repasse par commandes manuelles au lieu du menu
-
-            else:   
-                embed.add_field(
-                    name ='.jour <jour/nuit>', 
-                    value = "Le temps est déjà le jour ou l'argument rentré est erroné.", 
-                    inline = False
-                )
-
-                await ctx.channel.send("⚠️ **Erreur de commande** <@{}>".format(ctx.author.id))
-                await ctx.send(embed=embed)
-    
-    else:
-        embed.add_field(
-            name ='.jour <jour/nuit>', 
-            value = "La partie n'a pas encore commencé.", 
-            inline = False
-        )
-
-        await ctx.channel.send("⚠️ **Erreur de commande** <@{}>".format(ctx.author.id))
-        await ctx.send(embed=embed)
-
     await menu(ctx)
-
-
-# ==========================================================================================================================================================
-
-
-async def couple(ctx):
-
-    global dicoroles, Lp, can_talk, cant_talk, game_started, channels,L_joueurs,check_couple, dicomembers, annoncef
-
-    author = mdj
-
-    check_couple = True
-
-    members = [k for k in L_joueurs]
-
-    for member in members:
-        fiche_player = Lp[dicomembers[member]]
-        rolep = fiche_player[1]
-        if rolep == 'Jaloux':
-            members.remove(member)
-            break
-    
-    i1 = rdm.randint(0,len(members)-1)
-    if str(members[i1]) != author:
-        amant1 = members[i1]
-        print(Lp[dicomembers[members[i1]]])
-        Lp[dicomembers[members[i1]]][4] = 'Oui'
-        members.pop(i1)
-
-    i2 = rdm.randint(0,len(members)-1)
-    if str(members[i2]) != author:
-        amant2 = members[i2]
-        print(Lp[dicomembers[members[i2]]])
-        Lp[dicomembers[members[i2]]][4] = 'Oui'
-        members.pop(i2)
-
-    await channels[6].set_permissions(amant1, overwrite=can_see)
-    await channels[6].set_permissions(amant2, overwrite=can_see)
-    await amant1.send("Tu es en couple avec {}".format(amant2))
-    await amant2.send("Tu es en couple avec {}".format(amant1))
-    print("Amant 1: {}, Amant 2: {}".format(amant1,amant2))
-    await ctx.channel.send("Amant 1: {}, Amant 2: {}".format(amant1,amant2))
-
-    annoncef.append("\n❤️ Les amants sont: ``{0.name}`` et ``{1.name}``".format(amant1, amant2))
 
 
 
@@ -2577,9 +1876,11 @@ async def couple(ctx):
 
 async def cupidon_panel(ctx):
 
-    global dicoroles, Lp, can_talk, cant_talk, game_started, channels, L_joueurs, dicomembers, step, id_panel, cr_commands
+    global cr_commands
 
     cr_commands.append("[{}] Action Cupidon exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
+
+    lc = []
 
     embed_panel = discord.Embed(
         colour = discord.Color.from_rgb(255,0,70)
@@ -2596,39 +1897,63 @@ async def cupidon_panel(ctx):
         inline = False
     )
 
+    await ctx.channel.send("Veuillez choisir le 1e amant")
     current_panel = await ctx.channel.send(embed=embed_panel)
 
     for name in dicop_name_to_emoji:
         await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("✅")
     await current_panel.add_reaction("❌")
 
-    id_panel = current_panel.id
-    step = 'Cupidon'
+    def checkCupi(reaction, user):
+        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
 
-    print(id_panel, step)
-
-
-async def cupidon_action(ctx, react, user_react):
-# state designe si on ajoute un membre, si on valide ou si on annule
-# Validation/Ajout/Annulation
-
-    global liste_couple, cpt_reaction
-
-    if len(liste_couple) < 2:
-        await ctx.remove_reaction('✅', user_react)
-        await ctx.channel.send("Vous n'avez pas sélectionné assez d'amants. Il manque {} amant(s).".format(2-cpt_reaction))
+    try:
+        reaction, user = await client.wait_for("reaction_add", check=checkCupi, timeout=30.0)
+    except asyncio.TimeoutError:
+        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+        await current_panel.delete()
+        await menu(ctx)
     else:
-        cpl1 = liste_couple[0]
-        cpl2 = liste_couple[1]
-        await channels[6].set_permissions(cpl1, overwrite=can_see)
-        await channels[6].set_permissions(cpl2, overwrite=can_see)
-        await cpl1.send("Tu es en couple avec {}".format(cpl2))
-        await cpl2.send("Tu es en couple avec {}".format(cpl1))
-        await ctx.channel.send("Liste des amants: {} et {}".format(cpl1,cpl2))
-        await ctx.delete()
-        cpt_reaction = 0
-        liste_couple = []
+        if str(reaction.emoji) == non:
+            await ctx.channel.send("Commande annulée")
+            await reaction.message.delete()
+            await menu(ctx)
+        else:
+            lc.append(dicop_emoji[reaction.emoji][0])
+            reaction.message.delete()
+            await ctx.channel.send("Veuillez choisir le 2e amant")
+            panel2 = await ctx.channel.send(embed=embed_panel)
+            for name in dicop_name_to_emoji:
+                if name not in lc:
+                    await panel2.add_reaction(dicop_name_to_emoji[name])
+            try:
+                reaction, user = await client.wait_for("reaction_add", check=checkCupi, timeout=30.0)
+            except asyncio.TimeoutError:
+                await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+                await panel2.delete()
+                await menu(ctx)
+            else:
+                lc.append(dicop_emoji[reaction.emoji][0])
+                await enfant_action(ctx, lc)
+
+
+
+async def cupidon_action(ctx, liste_couple):
+
+    global Lp
+
+    cpl1 = liste_couple[0]
+    cpl2 = liste_couple[1]
+
+    Lp[dicomembers[cpl1]] = 'Couple'
+    Lp[dicomembers[cpl2]] = 'Couple'
+
+    await channels[6].set_permissions(cpl1, overwrite=can_see)
+    await channels[6].set_permissions(cpl2, overwrite=can_see)
+    await cpl1.send("Tu es en couple avec **{.name}** \nTu as maintenant accès à un channel privé avec cette personne.".format(cpl2))
+    await cpl2.send("Tu es en couple avec **{.name}** \nTu as maintenant accès à un channel privé avec cette personne.".format(cpl1))
+    await ctx.channel.send("Liste des amants: **{}** et **{}**".format(cpl1,cpl2))
+    await ctx.delete()
 
     await menu(ctx)
 
@@ -2639,7 +1964,7 @@ async def cupidon_action(ctx, react, user_react):
 
 async def enfant_panel(ctx):
 
-    global dicoroles, Lp, can_talk, cant_talk, game_started, channels, L_joueurs, dicomembers, enfant_name, id_panel, step, cr_commands
+    global cr_commands
 
     cr_commands.append("[{}] Action Enfant exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
 
@@ -2662,28 +1987,33 @@ async def enfant_panel(ctx):
 
     for name in dicop_name_to_emoji:
         fiche_player = Lp[dicomembers[name]]
-        rolep = fiche_player[1]
-        if str(rolep) == 'Enfant':
-            print("ok enfant name")
-            enfant_name = name
-        elif str(rolep) == "Mort":
-            print("ok mort")
-            pass
+        if str(fiche_player[1]) == 'Enfant':
+            n_enfant = name
         else:
-            print("ok not enfant")
             await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("✅")
     await current_panel.add_reaction("❌")
 
-    id_panel = current_panel.id
-    step = 'Enfant'
-        
-    print(id_panel, step)
+    def checkEnfant(reaction, user):
+        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
+
+    try:
+        reaction, user = await client.wait_for("reaction_add", check=checkEnfant, timeout=30.0)
+    except asyncio.TimeoutError:
+        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+        await current_panel.delete()
+        await menu(ctx)
+    else:
+        if str(reaction.emoji) == non:
+            await ctx.channel.send("Commande annulée")
+            await reaction.message.delete()
+            await menu(ctx)
+        else:
+            await enfant_action(ctx, dicop_emoji[reaction.emoji][0], n_enfant)
 
 
-async def enfant_action(ctx):
+async def enfant_action(ctx, maitre_name, enfant_name):
 
-    global maitre_name, enfant_name, Lp, cpt_reaction, dicomembers
+    global Lp
 
     fiche_maitre = Lp[dicomembers[maitre_name]]
     fiche_maitre[5] = 'Maitre'
@@ -2692,8 +2022,6 @@ async def enfant_action(ctx):
     fiche_enfant[6] = 'Villageois'
     await ctx.channel.send("{} est le maître de {}.".format(str(maitre_name), str(enfant_name)))
     await ctx.delete()
-    cpt_reaction = 0
-    maitre_name = None
 
     await menu(ctx)
 
@@ -2703,7 +2031,7 @@ async def enfant_action(ctx):
 
 async def voleur_panel(ctx):
 
-    global dicoroles, Lp, can_talk, cant_talk, game_started, channels,L_joueurs, dicomembers, is_enfant, voleur_name, id_panel, step, cr_commands
+    global cr_commands
 
     cr_commands.append("[{}] Action Voleur exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
 
@@ -2718,7 +2046,7 @@ async def voleur_panel(ctx):
 
     embed_panel.add_field(
         name ='Les emojis des joueurs sont rappelés chaque nuit.', 
-        value = "Réagissez à un émoji joueur pour **désigner le joueur qui sera volé**. \n \n Réagissez à l'emoji ✅ pour **confirmer votre choix**. \n \n Réagissez à l'émoji ❌ pour **annuler la commande**.", 
+        value = "Réagissez à un émoji joueur pour **désigner le joueur qui sera volé**. \n \nRéagissez à l'emoji ✅ pour **confirmer votre choix**. \n \nRéagissez à l'émoji ❌ pour **annuler la commande**. \n \nVous avez ``30 secondes`` pour répondre.", 
         inline = False
     )
 
@@ -2726,29 +2054,33 @@ async def voleur_panel(ctx):
 
     for name in dicop_name_to_emoji:
         fiche_player = Lp[dicomembers[name]]
-        rolep = fiche_player[1]
-        if str(rolep) == 'Voleur':
-            voleur_name = name
-        elif str(rolep) == "Mort":
-            pass
+        if str(fiche_player[1]) == 'Voleur':
+            n_voleur = name
         else:
             await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("✅")
     await current_panel.add_reaction("❌")
 
-    id_panel = current_panel.id
-    step = "Voleur"
+    def checkVoleur(reaction, user):
+        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
 
-    print(id_panel, step)
+    try:
+        reaction, user = await client.wait_for("reaction_add", check=checkVoleur, timeout=30.0)
+    except asyncio.TimeoutError:
+        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+        await current_panel.delete()
+        await menu(ctx)
+    else:
+        if str(reaction.emoji) == non:
+            await ctx.channel.send("Commande annulée")
+            await reaction.message.delete()
+            await menu(ctx)
+        else:
+            await voleur_action(ctx, dicop_emoji[reaction.emoji][0], n_voleur, 'Voleur')
 
 
-async def voleur_action(ctx):
+async def voleur_action(ctx, stolen_name, voleur_name, step):
 
-    global stolen_name, voleur_name, Lp, cpt_reaction, servante_name, devo_name
-
-    if step == 'Servante':
-        voleur_name = servante_name
-        stolen_name = devo_name
+    global Lp
 
     fiche_stolen = Lp[dicomembers[stolen_name]]
     role_stolen = fiche_stolen[1]
@@ -2772,13 +2104,10 @@ async def voleur_action(ctx):
     await channels[dicoroles[role_voleur]].set_permissions(voleur_name, overwrite=cant_talk)
     await channels[dicoroles[role_voleur]].set_permissions(stolen_name, overwrite=can_talk)
 
-    await stolen_name.send("Ton rôle a été volé, tu es maintenant Voleur")
-    await voleur_name.send("Tu as volé la personne avec le rôle {}".format(str(role_stolen)))
+    await stolen_name.send("Ton rôle a été volé, tu es maintenant **Voleur**")
+    await voleur_name.send("Tu as volé la personne avec le rôle **{}**".format(str(role_stolen)))
     await ctx.channel.send("{} a volé le rôle de {}, qui était {}.".format(str(voleur_name),str(stolen_name),str(role_stolen)))
     await ctx.delete()
-    cpt_reaction = 0
-    stolen_name = None
-    voleur_name = None
 
     if step == 'Voleur':
         await menu(ctx)
@@ -2790,7 +2119,7 @@ async def voleur_action(ctx):
 
 async def infect_panel(ctx):
 
-    global dicoroles, Lp, can_talk, cant_talk, game_started, channels, L_joueurs, dicomembers, id_panel, step, is_enfant, cr_commands
+    global cr_commands
 
     cr_commands.append("[{}] Action Infect exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
 
@@ -2813,24 +2142,33 @@ async def infect_panel(ctx):
 
     for name in dicop_name_to_emoji:
         fiche_player = Lp[dicomembers[name]]
-        rolep = fiche_player[1]
-        status_infect = fiche_player[9]
-        if str(rolep) == 'LG' or str(rolep) == 'LGA' or str(rolep) == 'LGB' or str(rolep) == 'IPDL' or str(rolep) == 'GML' or status_infect == 'Infecté' or str(rolep) == "Mort" or (str(rolep) == 'Enfant' and is_enfant == True):
+        if str(fiche_player[1]) == 'LG' or str(fiche_player[1]) == 'LGA' or str(fiche_player[1]) == 'LGB' or str(fiche_player[1]) == 'IPDL' or str(fiche_player[1]) == 'GML' or fiche_player[9] == 'Infecté' or (str(fiche_player[1]) == 'Enfant' and is_enfant == True):
             pass
         else:    
             await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("✅")
     await current_panel.add_reaction("❌")
 
-    id_panel = current_panel.id
-    step = 'Infecté'
+    def checkInfect(reaction, user):
+        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
 
-    print(id_panel, step)
+    try:
+        reaction, user = await client.wait_for("reaction_add", check=checkInfect, timeout=30.0)
+    except asyncio.TimeoutError:
+        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+        await current_panel.delete()
+        await menu(ctx)
+    else:
+        if str(reaction.emoji) == non:
+            await ctx.channel.send("Commande annulée")
+            await reaction.message.delete()
+            await menu(ctx)
+        else:
+            await infect_action(ctx, dicop_emoji[reaction.emoji][0])
 
 
-async def infect_action(ctx):
+async def infect_action(ctx, infect_name):
 
-    global infect_name, cpt_reaction, Lp
+    global Lp
 
     pi = Lp[dicomembers[infect_name]]
 
@@ -2844,8 +2182,6 @@ async def infect_action(ctx):
     await infect_name.send("Tu as été infécté, tu es maintenant dans le camp des Loup-garous.")
     await ctx.channel.send("{} a été infécté.".format(str(infect_name)))
     await ctx.delete()
-    cpt_reaction = 0
-    infect_name = None
 
     await menu(ctx)
 
@@ -2856,9 +2192,11 @@ async def infect_action(ctx):
 
 async def charm_panel(ctx):
 
-    global dicoroles, Lp, can_talk, cant_talk, game_started, channels, L_joueurs, dicomembers, id_panel, step, cr_commands
+    global cr_commands
 
     cr_commands.append("[{}] Action JDF exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
+
+    lc = []
 
     embed_panel = discord.Embed(
         colour = discord.Color.from_rgb(255,30,100)
@@ -2879,24 +2217,50 @@ async def charm_panel(ctx):
 
     for name in dicop_name_to_emoji:
         fiche_player = Lp[dicomembers[name]]
-        rolep = fiche_player[1]
-        status_charm = fiche_player[7]
-        if str(rolep) == 'JDF' or status_charm == 'Charmé' or str(rolep) == "Mort":
+        if str(fiche_player[1]) == 'JDF' or fiche_player[7] == 'Charmé':
             pass      
         else:
             await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("✅")
     await current_panel.add_reaction("❌")
 
-    id_panel = current_panel.id
-    step = 'Charmé'
-    
-    print(id_panel, step)
+    def checkCharm(reaction, user):
+        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
+
+    try:
+        reaction, user = await client.wait_for("reaction_add", check=checkCharm, timeout=30.0)
+    except asyncio.TimeoutError:
+        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+        await current_panel.delete()
+        await menu(ctx)
+    else:
+        if str(reaction.emoji) == non:
+            await ctx.channel.send("Commande annulée")
+            await reaction.message.delete()
+            await menu(ctx)
+        else:
+            lc.append(dicop_emoji[reaction.emoji][0])
+            reaction.message.delete()
+            await ctx.channel.send("Si vous ne souhaitez charmer qu'une seule personne, réagissez à l'émoji ❌")
+            panel2 = await ctx.channel.send(embed=embed_panel)
+            for name in dicop_name_to_emoji:
+                if name not in lc:
+                    await panel2.add_reaction(dicop_name_to_emoji[name])
+            await panel2.add_reaction("❌")
+            try:
+                reaction, user = await client.wait_for("reaction_add", check=checkCupi, timeout=30.0)
+            except asyncio.TimeoutError:
+                await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+                await panel2.delete()
+                await menu(ctx)
+            else:
+                if reaction.emoji in dicop_emoji:
+                    lc.append(dicop_emoji[reaction.emoji][0])
+                await charm_action(ctx, lc)
 
 
-async def charm_action(ctx):
+async def charm_action(ctx, liste_charm):
 
-    global liste_charm, cpt_reaction, Lp
+    global Lp
 
     for member in liste_charm:
         Lp[dicomembers[member]][7] = 'Charmé'
@@ -2905,9 +2269,6 @@ async def charm_action(ctx):
         await ctx.channel.send("{} a été charmé".format(str(member)))
 
     await ctx.delete()
-    cpt_reaction = 0
-    liste_charm = []
-
     await menu(ctx)
 
 
@@ -2916,9 +2277,8 @@ async def charm_action(ctx):
 
 
 async def kill_panel(ctx):
-#Commande permettant de tuer un joueur
 
-    global L_joueurs, Lroles_dispo, game_started, channels, dicoroles, can_talk, cant_talk, Lp, ancien_dead, dicomembers, is_enfant, check_couple, is_compo, id_panel, step, cr_commands
+    global cr_commands
 
     cr_commands.append("[{}] Action Kill exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
 
@@ -2933,50 +2293,44 @@ async def kill_panel(ctx):
 
     embed_panel.add_field(
         name ='Les emojis des joueurs sont rappelés chaque nuit.', 
-        value = "Réagissez à un émoji joueur pour **désigner le joueur qui va mourir**. \n \n Réagissez à l'emoji ✅ pour **confirmer votre choix**. \n \n Réagissez à l'émoji ❌ pour **annuler la commande**.", 
+        value = "Réagissez à un émoji joueur pour **désigner le joueur qui va mourir**. \n \nRéagissez à l'emoji ✅ pour **confirmer votre choix**. \n \nRéagissez à l'émoji ❌ pour **annuler la commande**.", 
         inline = False
     )
 
     current_panel = await ctx.channel.send(embed=embed_panel)
 
     for name in dicop_name_to_emoji:
-        fiche_player = Lp[dicomembers[name]]
-        rolep = fiche_player[1]
-        if str(rolep) == 'Mort':
-            pass
-        else:
-            await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("✅")
+        await current_panel.add_reaction(dicop_name_to_emoji[name])
     await current_panel.add_reaction("❌")
 
-    id_panel = current_panel.id
-    step = 'Kill'
-    
-    print(id_panel, step)
+    def checkKill(reaction, user):
+        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
 
+    try:
+        reaction, user = await client.wait_for("reaction_add", check=checkKill, timeout=30.0)
+    except asyncio.TimeoutError:
+        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+        await current_panel.delete()
+        await menu(ctx)
+    else:
+        if str(reaction.emoji) == non:
+            await ctx.channel.send("Commande annulée")
+            await reaction.message.delete()
+            await menu(ctx)
+        else:
+            await kill_action(ctx, dicop_emoji[reaction.emoji][0], 'Kill')
 
-async def kill_action(ctx):
+async def kill_action(ctx, killed_name, step):
 
-    global Lp, is_enfant, cpt_reaction, p_emoji, servante_name, killed_name, devo_name, check_couple
+    global Lp, is_enfant, check_couple, ancien_dead, dicop_emoji, dicop_id_to_emoji, dicop_name_to_emoji
 
-    author = panel_author
-
+    author = mdj
     channel = mdj.voice.channel
     members = channel.members
 
-    L_j_temp = [k for k in members]
-    #Copie de members
+    members = [k for k in members if str(k) != str(author)]
 
-    for i in range(0,len(members)):
-        if str(members[i]) == str(author):
-            L_j_temp.pop(i)
-            break
-
-    Lroles_aff = []
     affiche = False
-
-    if step == "Servante":
-        killed_name = devo_name
 
     pla = Lp[dicomembers[killed_name]]
     rolep = pla[1]
@@ -3026,7 +2380,7 @@ async def kill_action(ctx):
         if status_maitre == 'Maitre' and is_enfant == False:
             print("OK Maitre")
             is_enfant = True
-            for memberenf in L_j_temp:
+            for memberenf in members:
                 pla_en = Lp[dicomembers[memberenf]]
                 status_enfant = pla_en[5]
                 print(memberenf, pla_en)
@@ -3075,6 +2429,11 @@ async def kill_action(ctx):
             pass
 
         pla[1] = 'Mort'
+        del dicop_emoji[dicop_name_to_emoji[member]]
+        del dicop_name_to_emoji[member]
+        del dicop_id_to_emoji[member.id]
+        del dicomembers[member]
+        
 
         print('OK {} est mort, il était {}'.format(str(member), rolep))
 
@@ -3095,16 +2454,8 @@ async def kill_action(ctx):
                     title = "Informations partie"
                 )
 
-                Laff = []
-                for i in range(0,len(Lroles_dispo)):
-                    if Lroles_dispo[i] not in Lroles_aff:
-                        if Lroles_dispo[i] in trad_roles:
-                            Laff.append("``{}`` ({}) \n".format(trad_roles[Lroles_dispo[i]],Lroles_dispo.count(Lroles_dispo[i])))
-                        else:
-                            Laff.append("``{}`` ({}) \n".format(Lroles_dispo[i],Lroles_dispo.count(Lroles_dispo[i])))
-                        Lroles_aff.append(Lroles_dispo[i])
-                    elif Lroles_dispo[i] in Lroles_aff:
-                        Lroles_aff.append(Lroles_dispo[i])
+                Lroles_final = list(dict.fromkeys(Lroles_dispo))
+                Laff = ["``{}`` ({}) \n".format(trad_roles[k], Lroles_dispo.count(k)) if k in trad_roles else "``{}`` ({}) \n".format(k, Lroles_dispo.count(k)) for k in Lroles_final]
 
 
                 if check_couple == True:
@@ -3125,16 +2476,9 @@ async def kill_action(ctx):
                 await channels[1].send(embed=embedaf)
     
         else:
-            for i in range(0,len(Lroles_dispo)):
-                print(i,Lroles_dispo[i], rolep)
-                if Lroles_dispo[i] == rolep:
-                    Lroles_dispo.pop(i)
-                    break
+            Lroles_dispo = [k for k in Lroles_dispo if str(k) != str(rolep)]
 
     await ctx.delete()
-    cpt_reaction = 0
-    killed_name = None
-    print("Fin kill")
 
     await menu(ctx)
 
@@ -3144,7 +2488,7 @@ async def kill_action(ctx):
 
 async def noctambule_panel(ctx):
 
-    global L_joueurs, Lroles_dispo, game_started, channels, dicoroles, can_talk, cant_talk, Lp, dicomembers, id_panel, step, noctambule_name, cr_commands
+    global cr_commands
 
     cr_commands.append("[{}] Action Noctambule exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
 
@@ -3167,27 +2511,33 @@ async def noctambule_panel(ctx):
 
     for name in dicop_name_to_emoji:
         fiche_player = Lp[dicomembers[name]]
-        rolep = fiche_player[1]
-        roleimp = fiche_player[11]
-        rolet = fiche_player[12]
-        if str(rolep) == 'Mort':
-            pass
-        elif str(rolep) == 'Noctambule' or roleimp == 'Noctambule' or rolet == 'Noctambule':
-            noctambule_name = name
+        if str(fiche_player[1]) == 'Noctambule' or fiche_player[11] == 'Noctambule' or fiche_player[12] == 'Noctambule':
+            n_noctambule = name
         else:
             await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("✅")
     await current_panel.add_reaction("❌")
 
-    id_panel = current_panel.id
-    step = 'Noctambule'
+    def checkNoct(reaction, user):
+        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
 
-    print(id_panel, step)
+    try:
+        reaction, user = await client.wait_for("reaction_add", check=checkNoct, timeout=30.0)
+    except asyncio.TimeoutError:
+        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+        await current_panel.delete()
+        await menu(ctx)
+    else:
+        if str(reaction.emoji) == non:
+            await ctx.channel.send("Commande annulée")
+            await reaction.message.delete()
+            await menu(ctx)
+        else:
+            await noctambule_action(ctx, dicop_emoji[reaction.emoji][0], n_noctambule)
 
 
-async def noctambule_action(ctx):
+async def noctambule_action(ctx, victime_name, noctambule_name):
 
-    global Lp, victime_name, cpt_reaction, noctambule_name
+    global Lp
 
     fiche_victime = Lp[dicomembers[victime_name]]
     rolevi = fiche_victime[1]
@@ -3211,11 +2561,6 @@ async def noctambule_action(ctx):
     await victime_name.send("Vous avez été victime du Noctambule **({})**. Vous ne pouvez pas utiliser votre pouvoir cette nuit.".format(noctambule_name))
     await ctx.channel.send("**{}** (rôle: __{}__) a été victime du Noctambule (*{}*)".format(victime_name, rolevi, noctambule_name))
     await ctx.delete()
-    cpt_reaction = 0
-    noctambule_name = None
-    victime_name = None
-    
-    print("Fin nomctambule")
 
     await menu(ctx)
 
@@ -3225,7 +2570,7 @@ async def noctambule_action(ctx):
 
 async def servante_panel(ctx):
 
-    global L_joueurs, Lroles_dispo, game_started, channels, dicoroles, can_talk, cant_talk, Lp, dicomembers, id_panel, step, servante_name, cr_commands
+    global cr_commands
 
     cr_commands.append("[{}] Action Servante exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
 
@@ -3248,67 +2593,35 @@ async def servante_panel(ctx):
 
     for name in dicop_name_to_emoji:
         fiche_player = Lp[dicomembers[name]]
-        rolep = fiche_player[1]
-        roleimp = fiche_player[11]
-        rolet = fiche_player[12]
-        if str(rolep) == 'Mort':
-            pass
-        elif str(rolep) == 'Servante' or roleimp == 'Servante' or rolet == 'Servante':
-            servante_name = name
+        if str(fiche_player[1]) == 'Servante' or fiche_player[11] == 'Servante' or fiche_player[12] == 'Servante':
+            n_servante = name
         else:
             await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("✅")
     await current_panel.add_reaction("❌")
 
-    id_panel = current_panel.id
-    step = 'Servante'
+    def checkServ(reaction, user):
+        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
 
-    print(id_panel, step)
-
-
-
-# ==========================================================================================================================================================
-
-
-async def reset_panel(ctx):
-
-    cr_commands.append("[{}] Action Reset exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
-
-    global step, id_panel
-
-    embed = discord.Embed(
-        colour = discord.Color.from_rgb(85,0,25),
-        title = 'Commande reset'
-    )
-
-    embed.set_author(
-        name = "LG Bot",
-        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-    )
-
-    embed.add_field(
-        name = "⚠️ Ce choix n'est pas réversible !",
-        value = "Attention: vous ne pouvez pas revenir en arrière si vous décidez d'arrêter la partie maintenant. \n \n Réagissez à l'émoji ✅ pour **confirmer votre choix d'arrêter la partie.** \n \n Réagissez à l'émoji ❌ pour **annuler l'arrêt de la partie.**",
-        inline = False
-    )
-
-    panel = await ctx.channel.send(embed=embed)
-
-    await panel.add_reaction("✅")
-    await panel.add_reaction("❌")
-
-    step = "Reset"
-    id_panel = panel.id
-
-    print(id_panel, step)
+    try:
+        reaction, user = await client.wait_for("reaction_add", check=checkServ, timeout=30.0)
+    except asyncio.TimeoutError:
+        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+        await current_panel.delete()
+        await menu(ctx)
+    else:
+        if str(reaction.emoji) == non:
+            await ctx.channel.send("Commande annulée.")
+            await reaction.message.delete()
+            await menu(ctx)
+        else:
+            await voleur_action(ctx, dicop_emoji[reaction.emoji][0], n_servante, 'Servante')
+            await kill_action(ctx, dicop_emoji[reaction.emoji][0], 'Servante')
 
 
 # ==========================================================================================================================================================
 
 
 async def vote_panel(ctx):
-
-    global step, id_panel
 
     author = mdj
     channel = author.voice.channel
@@ -3321,8 +2634,6 @@ async def vote_panel(ctx):
         except:
             await ctx.channel.send("Le message d'information n'a pas pu être envoyé à {.name}".format(member))
 
-        
-    
 
     embed = discord.Embed(
         colour = discord.Color.green()
@@ -3345,27 +2656,7 @@ async def vote_panel(ctx):
     await embed_vote.add_reaction('✅')
     await embed_vote.add_reaction('❌')
 
-    step = 'Vote'
-    id_panel = embed_vote.id
-
-
-
-# ==========================================================================================================================================================
-
-
-
-@client.command()
-@commands.has_any_role("Maître du Jeu")
-async def listeid(ctx):
-
-    author = str(ctx.author)
-
-    channel = author.voice.channel
-    members = channel.members
-
-    for member in members:
-        await ctx.channel.send(str(member.id))
-
+    # A finir
 
 
 # ==========================================================================================================================================================
@@ -3373,21 +2664,24 @@ async def listeid(ctx):
 
 async def mute(ctx, state):
 
-    author = mdj
+    try:
+        author = mdj
 
-    channel = author.voice.channel
-    members = channel.members
+        channel = author.voice.channel
+        members = channel.members
 
-    for member in members:
-        if str(member) == str(author):
-            pass
-        else:
-            if state == 'mute':
-                await member.edit(mute=True)
-            elif state == 'unmute':
-                await member.edit(mute=False)
+        for member in members:
+            if str(member) == str(author):
+                pass
+            else:
+                if state == 'mute':
+                    await member.edit(mute=True)
+                elif state == 'unmute':
+                    await member.edit(mute=False)
 
-    await menu(ctx)
+        await menu(ctx)
+    except:
+        pass
 
 
 # ==========================================================================================================================================================
@@ -3464,11 +2758,54 @@ async def freset(ctx):
 
 # ==========================================================================================================================================================
 
+async def reset_panel(ctx):
+
+    embed = discord.Embed(
+        colour = discord.Color.from_rgb(85,0,25),
+        title = 'Commande reset'
+    )
+
+    embed.set_author(
+        name = "LG Bot",
+        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
+    )
+
+    embed.add_field(
+        name = "⚠️ Ce choix n'est pas réversible !",
+        value = "Attention: vous ne pouvez pas revenir en arrière si vous décidez d'arrêter la partie maintenant. \n \n Réagissez à l'émoji ✅ pour **confirmer votre choix d'arrêter la partie.** \n \n Réagissez à l'émoji ❌ pour **annuler l'arrêt de la partie.**",
+        inline = False
+    )
+
+    panel = await ctx.channel.send(embed=embed)
+
+    await panel.add_reaction("✅")
+    await panel.add_reaction("❌")
+
+    def checkReset(reaction, user):
+        print(panel.id, reaction.message.id)
+        return (user == mdj) and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌") and (reaction.message.id == panel.id)
+
+    try:
+        reaction, user = await client.wait_for("reaction_add", check=checkReset, timeout=30.0)
+    except asyncio.TimeoutError:
+        await ctx.channel.send("Vous avez mis trop de temps à répondre")
+        await panel.delete()
+        await menu(ctx)
+    else:
+        if str(reaction.emoji) == "❌":
+            await ctx.channel.send("Commande annulée")
+            await reaction.message.delete()
+            await menu(ctx)
+        else:
+            await reset(ctx)
+
+# ==========================================================================================================================================================
+
 
 async def reset(ctx):
 #Commande d'arrêt du jeu
 
-    global can_vote, bot_token, liste_roles, liste_LG, liste_village, LrVillage, LrLG, LrSolo, LrAutre, Lroles_dispo, Lroles_traitre, Lroles_voleur, dicoimp, L_joueurs, Lp, channels, text_channel_list, emojis_action, dicomembers, dicop_id_to_emoji, dicop_name_to_emoji, dicop_emoji, Lemojis, inscription_chan, liste_couple, liste_charm, enfant_name, maitre_name, voleur_name, stolen_name, infect_name, killed_name, panel_author, imposteur_name, noctambule_name, victime_name, servante_name, devo_name, is_compo, is_channels, in_game, game_started, day, is_enfant, ancien_dead, check_couple, valuepf, cpt_jour, is_info, id_panel, id_vote, step, cpt_reaction, Lannonce_vote, Laffichage_vote, annoncef, mdj, cr_commands, cr_chat, cr_actions
+    global can_vote, Lroles_dispo, Lp, channels, dicomembers, dicop_id_to_emoji, dicop_name_to_emoji, dicop_emoji, is_compo, is_channels, in_game, game_started, day, is_enfant, ancien_dead, check_couple, valuepf, cpt_jour, mdj, cr_commands, cr_chat, cr_actions
 
     try:
         author = mdj
@@ -3477,24 +2814,9 @@ async def reset(ctx):
     except:
         members = []
 
-
-    """
-    guild = ctx.guild
-
-    print("Commande .reset exécutée à {} par {}.".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
-
-    L_j_temp = [k for k in members]
-    #Copie de members
-
-    for i in range(0,len(members)):
-        if str(members[i]) == str(author):
-            L_j_temp.pop(i)
-    """
-
     if in_game == True:
 
         for member in members:
-            # await inscription_chan.set_permissions(member, overwrite=can_talk)
             await channels[2].set_permissions(member, overwrite=can_talk)
             await channels[3].set_permissions(member, overwrite=cant_talk)
             print("OK, {}".format(member))
@@ -3550,7 +2872,6 @@ async def reset(ctx):
         await ctx.channel.send("Aucune partie n'est en cours: simple reset des permissions")
 
         for member in members:
-            # await inscription_chan.set_permissions(member, overwrite=can_talk)
             await channels[2].set_permissions(member, overwrite=can_talk)
             await channels[3].set_permissions(member, overwrite=cant_talk)
             print("OK, {}".format(member))

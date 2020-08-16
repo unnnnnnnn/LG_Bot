@@ -38,3 +38,6 @@ can_see = discord.PermissionOverwrite()
 # Permissions (voit le salon mais ne peut pas parler)
 can_see.send_messages = False
 can_see.read_messages = True
+
+ok = "✅"
+non = "❌"

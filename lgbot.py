@@ -9,6 +9,7 @@ import re
 import sys
 import time
 import os
+import json
 import random as rdm
 from discord.utils import get
 from discord.ext import commands
@@ -24,65 +25,6 @@ client = commands.Bot(command_prefix=".")
 client.remove_command("help")
 
 
-# ==========================================================================================================================================================
-
-
-"""
-
-"""
-
-# ==========================================================================================================================================================
-
-def initialize():
-
-    global Lroles_dispo, Lroles_traitre, Lroles_voleur, Lp, channels, dicomembers, dicop_id_to_emoji, dicop_name_to_emoji, dicop_emoji, is_compo, is_channels, in_game, game_started, day, is_enfant, ancien_dead, check_couple, valuepf, cpt_jour, cant_talk, can_talk, can_see, mdj, cr_commands, cr_chat, cr_actions, can_vote
-
-    Lroles_dispo = []
-    #Liste des rôles disponibles dans 1 partie
-    Lp = []
-    #Liste finale de joueur
-
-    channels = []
-
-    dicomembers = {}
-    dicop_id_to_emoji = {}
-    dicop_name_to_emoji = {}
-    dicop_emoji = {}
-
-    is_compo = False
-    is_channels = False
-    in_game = False
-    game_started = False
-    day = True
-    is_enfant = False
-    #Booleans qui permettent de contrôler l'état de la partie
-
-    ancien_dead = False
-    check_couple = False
-    #Permet de gérer les erreurs liées à l'ancien et au couple
-
-    valuepf = 25
-    #Pourcentage par défaut que une lettre change pour la petite-fille
-
-    cpt_jour = 0
-    #Compteur de jour
-
-    can_vote = False
-
-    mdj = None
-
-    cr_commands = []
-    # Logs des commandes d'une partie
-    cr_chat = []
-    # Logs des messages
-    cr_actions = []
-    # Logs des actions (joueurs, morts, actions etc..)
-
-    print("Les constantes sont à l'état initial")
-
-    
-initialize()
-
 @client.event
 async def on_ready():
 #Fonction initiale du bot (automatique)
@@ -90,130 +32,144 @@ async def on_ready():
 
     
     await client.wait_until_ready()
-    await client.change_presence(activity=discord.Game(name=".help (ver. 10)"))
+    await client.change_presence(activity=discord.Game(name="🐺 | .help"))
     print('Bot connecté {0.user}'.format(client))
 
     online = client.get_channel(742095974033260611)
     await online.send('✅ **{0.user}** connecté à ``{1}``'.format(client, datetime.now().strftime("%H:%M:%S")))
-    
 
-
-# ==========================================================================================================================================================
 
 
 @client.event
 async def on_message(ctx):
-    global day, channels, Lroles_dispo, cr_chat, Lp
+
+    try:
+        gid = str(ctx.guild.id)
+
+        with open('guilds.json') as f:
+            data = json.load(f)
+
+        channels = [client.get_channel(k) for k in data[gid]["channels"]]
+        aid = data[gid]["mdj"]
+        mdj = client.get_user(aid)
+        
+        with open('games.json') as gf:
+            gdata = json.load(gf)
+
+        game_started = gdata[aid]["game_started"]
+        day = gdata[aid]["day"]
+        Lroles_dispo = gdata[aid]["Lroles"]
+        cpt_jour = gdata[aid]["cpt_jour"]
+        can_vote = gdata[aid]["can_vote"]
+        Lp = gdata[aid]["Lp"]
+
+    except:
+        pass
 
     author = ctx.author
     rolemdj = 'Maître du Jeu'
     rolebot = 'LG Bot'
     is_okmsg = True
 
-    if game_started == True:
 
-        # Cas où channel privé
-        if ctx.channel.type is discord.ChannelType.private:
-            if author.bot:
-                pass
-            else:
-                if can_vote == False:
-                    is_okmsg = False
-                    await ctx.author.send("Les messages privés avec le bot ne sont pas autorisés pendant la partie, __sauf pendant le vote__.")
+    try:
+        if game_started == True:
 
-                elif can_vote == True and Lp[dicomembers[ctx.author]][13] == 'Non':
-                    await ctx.author.send("❌ Vous avez déjà voté. Vous ne pouvez pas voter à nouveau.")
-
-                elif can_vote == True and Lp[dicomembers[ctx.author]][13] == 'Oui':
-                    vote = str(ctx.content)
-
-                    if vote == 'blanc' or vote == 'Blanc':
-
-                        embedv = discord.Embed(
-                            colour = discord.Color.from_rgb(255,255,255)
-                        )
-                        embedv.set_author(
-                            name = "LG Bot",
-                            icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-                        )
-                        embedv.add_field(
-                            name = "📔 Vous avez fait votre choix",
-                            value = "Vous avez voté **Blanc** ◽",
-                            inline = False
-                        )
-
-                    else:
-                        try:
-                            member_name, member_discriminator = vote.split('#')
-                        except ValueError:
-                            await ctx.channel.send("❌ Nom de joueur non valide. Veuillez vérifier que vous ne vous êtes pas trompé.")
-                        else:
-                            
-                            aut_name, aut_disc = str(ctx.author).split('#')
-                            is_author = False
-
-                            for user in dicop_name_to_emoji:
-                                if (user.name, user.discriminator) == (member_name, member_discriminator):
-
-                                    if (user.name, user.discriminator) == (aut_name, aut_disc):
-                                        
-                                        if 'Ange' in Lroles_dispo:
-                                            is_author = True
-
-                                    if is_author == False:
-                                        Lp[dicomembers[ctx.author]][13] = 'Non'
-
-                                        embedv = discord.Embed(
-                                            colour = discord.Color.green(),
-                                        )
-                                        embedv.set_author(
-                                            name = ctx.author.name,
-                                            icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(ctx.author)
-                                        )
-                                        embedv.add_field(
-                                            name = "📔 Vous avez fait votre choix",
-                                            value = "Vous avez voté pour **{.name}**".format(user),
-                                            inline = False
-                                        )
-                                        embedv.set_thumbnail(
-                                            url = user.avatar_url
-                                        )
-
-                                        await ctx.author.send(embed=embedv)
-                                        await channels[0].send(embed=embedv)
-                                        break
-
-                                    else:
-                                        await ctx.author.send("❌ Vous ne pouvez pas voter pour vous même car il y a un Ange dans la partie.")
-                                        break
-                            
-                            if Lp[dicomembers[ctx.author]][13] == 'Oui' and is_author == False:
-                                await ctx.author.send("❌ Nom de joueur non valide. Veuillez vérifier que vous ne vous êtes pas trompé.")
-
-                            else:
-                                await ctx.author.send("✅ Votre vote a bien été pris en compte. Veuillez patienter jusqu'à la fin du vote.")
-
-
-
-        # Cas où auteur = bot ou mdj
-        try:
-            role_author = [role.name for role in author.roles]
-            if rolemdj in role_author or ctx.author.bot:
-                is_okmsg = False
-        except:
-            pass
-
-        
-        # Cas où il faut crypter un message
-        if is_okmsg == True:
-
-            if ctx.channel in channels:
-                if ctx.channel.name == 'commandes-bot' or ctx.channel.name == 'roles-de-la-game' or ctx.channel.name == '3e-oeil' or ctx.channel.name == 'chaman' or ctx.channel.name == 'petite-fille' or ctx.channel.name == 'jaloux':
+            # Cas où channel privé
+            if ctx.channel.type is discord.ChannelType.private:
+                if author.bot:
                     pass
-                else:
-                    cr_chat.append("[{}] {} a écrit dans {}: '{}' \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author, ctx.channel.name, emoji.demojize(ctx.content)))
 
-            else:
+                else:
+                    if can_vote == False:
+                        is_okmsg = False
+                        await ctx.author.send("Les messages privés avec le bot ne sont pas autorisés pendant la partie, __sauf pendant le vote__.")
+
+                    elif can_vote == True and Lp[str(ctx.author.id)][10] == 'Non':
+                        await ctx.author.send("❌ Vous avez déjà voté. Vous ne pouvez pas voter à nouveau.")
+
+                    elif can_vote == True and Lp[str(ctx.author.id)][10] == 'Oui':
+                        vote = str(ctx.content)
+
+                        if vote == 'blanc' or vote == 'Blanc':
+
+                            embedv = discord.Embed(
+                                colour = discord.Color.from_rgb(255,255,255)
+                            )
+                            embedv.set_author(
+                                name = "LG Bot",
+                                icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
+                            )
+                            embedv.add_field(
+                                name = "📔 Vous avez fait votre choix",
+                                value = "Vous avez voté **Blanc** ◽",
+                                inline = False
+                            )
+
+                        else:
+                            try:
+                                member_name, member_discriminator = vote.split('#')
+                            except ValueError:
+                                await ctx.channel.send("❌ Nom de joueur non valide. Veuillez vérifier que vous ne vous êtes pas trompé.")
+                            else:
+                                
+                                aut_name, aut_disc = str(ctx.author).split('#')
+                                is_author = False
+
+                                for user in dicop_name_to_emoji:
+                                    if (user.name, user.discriminator) == (member_name, member_discriminator):
+
+                                        if (user.name, user.discriminator) == (aut_name, aut_disc):
+                                            
+                                            if 'Ange' in Lroles_dispo:
+                                                is_author = True
+
+                                        if is_author == False:
+                                            Lp[str(ctx.author.id)][10] = 'Non'
+
+                                            embedv = discord.Embed(
+                                                colour = discord.Color.green(),
+                                            )
+                                            embedv.set_author(
+                                                name = ctx.author.name,
+                                                icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(ctx.author)
+                                            )
+                                            embedv.add_field(
+                                                name = "📔 Vous avez fait votre choix",
+                                                value = "Vous avez voté pour **{.name}**".format(user),
+                                                inline = False
+                                            )
+                                            embedv.set_thumbnail(
+                                                url = user.avatar_url
+                                            )
+
+                                            await ctx.author.send(embed=embedv)
+                                            await channels[0].send(embed=embedv)
+                                            break
+
+                                        else:
+                                            await ctx.author.send("❌ Vous ne pouvez pas voter pour vous même car il y a un Ange dans la partie.")
+                                            break
+                                
+                                if Lp[str(ctx.author.id)][10] == 'Oui' and is_author == False:
+                                    await ctx.author.send("❌ Nom de joueur non valide. Veuillez vérifier que vous ne vous êtes pas trompé.")
+
+                                else:
+                                    await ctx.author.send("✅ Votre vote a bien été pris en compte. Veuillez patienter jusqu'à la fin du vote.")
+
+
+            # Cas où auteur = bot ou mdj
+            try:
+                role_author = [role.name for role in author.roles]
+                if rolemdj in role_author or ctx.author.bot:
+                    is_okmsg = False
+            except:
+                pass
+            
+            
+            # Cas où il faut crypter un message
+            if is_okmsg == True:
+
                 #Cryptage du message
                 msg = ctx.content
                 strm = [c for c in msg]
@@ -255,6 +211,8 @@ async def on_message(ctx):
                         if 'Oeil' in Lroles_dispo and cpt_jour == 1:
                             await channels[23].send("({}) ".format(ctx.channel.name) + ''.join(strm))
 
+    except:
+        pass
 
     await client.process_commands(ctx)
 
@@ -262,15 +220,9 @@ async def on_message(ctx):
 @client.command()
 async def help(ctx):
 #Commande d'aide utilisateur
-#Affiche un embed
-
-    global page, embed1, embed2, embed3, dico_embed, cr_commands
-
-    page = 1
 
     author = ctx.author
     
-
     embed1 = discord.Embed(
         colour = discord.Color.red(),
         title = "🐺 Bienvenue sur le menu d'aide du LG Bot !"
@@ -367,111 +319,124 @@ async def help(ctx):
     await author.send(embed=embed3)
 
 
-# ==========================================================================================================================================================
-
-
 @client.command()
 @commands.has_any_role("Maître du Jeu")
 async def test(ctx):
+
+    with open('games.json') as f:
+        data = json.load(f)
+
+    await ctx.channel.send(', '.join(data[str(ctx.author.id)]["Lroles"]))
 
     eliste = rdm.sample(list(emoji.UNICODE_EMOJI), 3)
     for elm in eliste:
         await ctx.channel.send(elm)
 
 
-# ==========================================================================================================================================================
-
-
 @client.command()
 @commands.has_any_role("Maître du Jeu")
 async def setup(ctx):
 
-    global channels, in_game, is_channels, cant_talk, mdj
     author = ctx.author
-    mdj = author
     print("Commande .setup exécutée à {} par {}.".format(datetime.now().strftime("%H:%M:%S"), author))
 
-
-    guild = ctx.guild
-    text_channel_list = []
-
-    embed = discord.Embed(
-            colour = discord.Color.red(),
-            title = "Commande setup"
-        )
-
-    is_channels = False
-
-    name = 'Les Loups Garous de Thiercelieux'
-    category = discord.utils.get(ctx.guild.categories, name=name)
-
-    is_categ = False
-
-    for categorie in guild.categories:
-        if str(categorie) == name:
-            is_categ = True
-            break
-
-    if is_categ == False:
-        await guild.create_category(name)
-
-    print(is_categ)
-    category = discord.utils.get(ctx.guild.categories, name=name)
-
-
-    for channel in guild.text_channels:
-        if str(channel.category) == name:
-            text_channel_list.append(str(channel.name))
-
-
-    print(text_channel_list)
-    print(in_game)
+    with open("guilds.json") as f:
+        d = json.load(f)
         
-    if in_game == False:
+    if str(ctx.guild.id) in d:
+        await ctx.channel.send("La commande **.setup** a déjà été exécutée sur ce serveur.")
+        d[str(ctx.guild.id)]["in_game"] = False # A supprimer plus tard
+        with open("guilds.json", 'w') as f:
+            json.dump(d, f, indent=4)
+    else:
 
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False, read_message_history=False, mention_everyone=False, attach_files=False, embed_links=False)
-        }
-        overwrites_pdv = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, read_message_history=True, mention_everyone=False, attach_files=False, embed_links=False)
-        }
+        guild = ctx.guild
+        text_channel_list = []
+        channels = []
 
-        for i in range(0,30):
+        embed = discord.Embed(
+                colour = discord.Color.red(),
+                title = "Commande setup"
+            )
 
-            if chans[i] in text_channel_list:
-                print('{} déjà créée'.format(chans[i]))
-     
-            else:
-                if i == 1 or i == 2:
-                    await guild.create_text_channel(chans[i], category=category, overwrites=overwrites_pdv) 
+        is_channels = False
+
+        name = 'Les Loups Garous de Thiercelieux'
+        category = discord.utils.get(ctx.guild.categories, name=name)
+
+        is_categ = False
+
+        for categorie in guild.categories:
+            if str(categorie) == name:
+                is_categ = True
+                break
+
+        if is_categ == False:
+            await guild.create_category(name)
+
+        print(is_categ)
+        category = discord.utils.get(ctx.guild.categories, name=name)
+
+
+        for channel in guild.text_channels:
+            if str(channel.category) == name:
+                text_channel_list.append(str(channel.name))
+
+
+        print(text_channel_list)
+        print(in_game)
+            
+        if in_game == False:
+
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False, read_message_history=False, mention_everyone=False, attach_files=False, embed_links=False)
+            }
+            overwrites_pdv = {
+                guild.default_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, read_message_history=True, mention_everyone=False, attach_files=False, embed_links=False)
+            }
+
+            for i in range(0,30):
+
+                if chans[i] in text_channel_list:
+                    print('{} déjà créée'.format(chans[i]))
+        
                 else:
-                    await guild.create_text_channel(chans[i], category=category, overwrites=overwrites)
-                print('{} OK'.format(chans[i]))
+                    if i == 1 or i == 2:
+                        await guild.create_text_channel(chans[i], category=category, overwrites=overwrites_pdv) 
+                    else:
+                        await guild.create_text_channel(chans[i], category=category, overwrites=overwrites)
+                    print('{} OK'.format(chans[i]))
 
-            try:
-                channels.append((discord.utils.get(guild.text_channels, name=chans[i])).id)
-            except:
-                pass
+                try:
+                    channels.append((discord.utils.get(guild.text_channels, name=chans[i])).id)
+                except:
+                    pass
+        
+        with open('guilds.json') as json_file: 
+            data = json.load(json_file) 
+
+        data.update({str(ctx.guild.id):{"channels":channels, "in_game": False, "mdj": None, "valuepf": 25}})
+
+        with open('guilds.json', 'w') as f:
+            json.dump(data, f, indent = 4)
+        
+        channels = [client.get_channel(idc) for idc in channels]
+        print(channels)
+
+        await channels[0].send("Setup terminé.")
+        await channels[0].send("Pour connaître la démarche pour lancer une partie, entrez la commande **.hcreate**")
+
+        is_channels = True
+
+    # with open('guilds.json') as f:
+        # a = json.load(f)
     
-    channels = [client.get_channel(idc) for idc in channels]
-    print(channels)
-
-    await channels[0].send("Setup terminé.")
-    await channels[0].send("Pour commencer une partie, entrez la commande **.inscription create** lorsque tout les participants se trouvent dans le channel vocal.")
-
-    is_channels = True
-
-
-
-# ==========================================================================================================================================================
-
+    # print(a[str(ctx.guild.id)]["channels"][0])
 
 
 @client.command()
 @commands.has_any_role("Maître du Jeu")
 async def delete(ctx):
-
-    global channels
 
     guild = ctx.guild
 
@@ -485,15 +450,10 @@ async def delete(ctx):
     await category.delete()
 
     channels = []
-    
-
-# ==========================================================================================================================================================
 
 
 @client.command()
 async def hcreate(ctx):
-    
-    cr_commands.append("[{}] Commande .hcreate exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
 
     embed = discord.Embed(
         colour = discord.Color.from_rgb(0,0,120),
@@ -514,7 +474,7 @@ async def hcreate(ctx):
 
     embed.add_field(
         name = "⚙️ Utilisation de la commande:",
-        value = "Les paramètres de la commande sont: une liste ``<liste de rôles>`` et un paramètre de visibilité de la composition ``<visible/cachée>``. Ce paramètre sert à dire si l'on veut que les joueurs sachents la composition ou non. Certains rôles sont interdits avec une composition cachée. \n \n La syntaxe de la liste des rôles doit être comme cela: **Role1,Role2,...,Role**. Après on peut entrer l'argument de visibilité après un espace. On arrive donc à: ``.create Role1,Role2,...,Role visible`` par exemple. \n \n La syntaxe des rôles est également importantes. Certains d'entre eux ont une syntaxe raccourcie pour faciliter la création de partie. Les syntaxes des rôles se trouvent ci-dessous. Aussi, si l'on veut avoir plusieurs fois le même rôles dans la partie, il faudra renseigner plusieurs fois ce rôle (voir exemple ci-dessous).",
+        value = "Les paramètres de la commande sont: une liste ``<liste de rôles>`` et un paramètre de visibilité de la composition ``<visible/cachée>``. Ce paramètre sert à dire si l'on veut que les joueurs sachents la composition ou non. Certains rôles sont interdits avec une composition cachée. \n \n La syntaxe de la liste des rôles doit être comme cela: **Role1,Role2,...,Role**. Après on peut entrer l'argument de visibilité après un espace. On arrive donc à: ``.create Role1,Role2,...,Role visible`` par exemple. \n \n La syntaxe des rôles est également importante. Certains d'entre eux ont une syntaxe raccourcie pour faciliter la création de partie. Les syntaxes des rôles se trouvent ci-dessous. Aussi, si l'on veut avoir plusieurs fois le même rôles dans la partie, il faudra renseigner plusieurs fois ce rôle (voir exemple ci-dessous).",
         inline = False
     )
 
@@ -533,14 +493,18 @@ async def hcreate(ctx):
     await ctx.author.send(embed=embed)
 
 
-# ==========================================================================================================================================================
-
 @client.command()
 @commands.has_any_role("Maître du Jeu")
 async def create(ctx, strRole, compo):
 #Permet de créer une liste de rôles pour 1 partie
 
-    global Lroles_dispo, in_game, is_compo, cr_commands, file_token, cr_actions
+    gid = str(ctx.guild.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    in_game = data[gid]["in_game"]
 
     print("Commande .create exécutée à {} par {}.".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
 
@@ -557,14 +521,12 @@ async def create(ctx, strRole, compo):
     check_compo = False
     is_compo = False
 
-    print(in_game)
+    if gid in data:
 
-    if is_channels == True:
-
-        if compo == 'visible' or compo == 'Visible':
+        if compo == 'visible':
             is_compo = True
             check_compo = True
-        elif compo == 'cachée' or compo == 'Cachée':
+        elif compo == 'cachée':
             check_compo = True
         else:
             embed.set_author(
@@ -597,8 +559,6 @@ async def create(ctx, strRole, compo):
                     await ctx.channel.send("⚠️ **Erreur de commande** <@{}>".format(ctx.author.id))
                     await ctx.send(embed=embed)
 
-                    cr_commands.append("[{}] Erreur (commande .create): Un rôle n'était pas valide. Rôle non valide: {}".format(datetime.now().strftime("%H:%M:%S"), role))
-                    
                     Lroles_dispo = []
                     check_compo = False
                     break
@@ -659,39 +619,35 @@ async def create(ctx, strRole, compo):
                 await channels[1].send(embed=embedc)
 
                 if in_game == False:
+
+                    with open('games.json') as json_file: 
+                        data = json.load(json_file) 
+
+                    data.update({str(ctx.author.id):{"guild":ctx.guild.id,"Lp": [], "Lroles": [], "dicomembers": {},"idtoemoji": {},"dictemoji": {},"is_compo": is_compo,"game_started": False,"day": False,"is_enfant": False,"ancien_dead": False,"check_couple": False,"cpt_jour": 0,"can_vote": False}})
                     
-                    check_file = False
+                    with open('games.json', 'w') as f:
+                        json.dump(data, f, indent = 4)
 
-                    while check_file == False:
-                    
-                        file_token = rdm.randint(1000000,9999999)
-                        dirName = "Logs/{}".format(file_token)
-
-                        try:
-                            os.mkdir(dirName)
-                            print("Directory ", dirName, " Created ") 
-                            check_file = True
-
-                        except FileExistsError:
-                            print("Directory ", dirName, " already exists")
-
-
-                    print("Token de la partie: {}".format(file_token))
-                    # Token de la partie
-
-                    cr_actions.append("[{}] Début des logs d'actions, création d'une partie \n".format(datetime.now().strftime("%H:%M:%S")))
-
-                    cr_commands.append("[{}] Début des logs, création d'une partie \n".format(datetime.now().strftime("%H:%M:%S")))
-                    cr_commands.append("[{}] Génération d'un token de partie: {} \n \n".format(datetime.now().strftime("%H:%M:%S"),file_token))
-                    cr_commands.append("[{}] Liste des rôles de cette partie: {} \n \n".format(datetime.now().strftime("%H:%M:%S"),', '.join(Lroles_dispo)))
-
-                else:
-                    cr_commands.append("[{}] Changement des rôles de la partie: {} \n \n".format(datetime.now().strftime("%H:%M:%S"),', '.join(Lroles_dispo)))
-
-
-                in_game = True
-
+                with open('games.json') as jf:
+                    gdata = json.load(jf)
                 
+                gdata[str(ctx.author.id)]["Lroles"] = Lroles_dispo
+
+                with open('games.json', 'w') as f:
+                    json.dump(gdata, f, indent=4)
+
+
+
+                with open('guilds.json') as json_file:
+                    data = json.load(json_file)
+                
+                data[gid]["in_game"] = True
+                data[gid]["mdj"] = ctx.author.id
+
+                with open('guilds.json', 'w') as f:
+                    json.dump(data, f, indent=4)
+
+                    
 
     else:
         embed.set_author(
@@ -708,12 +664,7 @@ async def create(ctx, strRole, compo):
         await ctx.channel.send("⚠️ **Erreur de commande** <@{}>".format(ctx.author.id))
         await ctx.send(embed=embed)
 
-        cr_commands.append("[{}] Erreur (commande .create): la commande .setup n'a pas été exécutée".format(datetime.now().strftime("%H:%M:%S")))
-
-
-    print(in_game)
-
-# ==========================================================================================================================================================
+    print(gdata[str(ctx.author.id)]["Lroles"])
 
 
 @client.command()
@@ -721,7 +672,14 @@ async def create(ctx, strRole, compo):
 async def inscription(ctx, action):
     # Permet d'inscrire automatiquement tout le monde à la partie.
 
-    global is_channels, dicop_name_to_emoji, dicop_id_to_emoji, dicop_emoji, cr_commands
+    gid = str(ctx.guild.id)
+    aid = str(ctx.author.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    in_game = data[gid]["in_game"]
 
     print("Commande .inscription {} exécutée à {} par {}.".format(action, datetime.now().strftime("%H:%M:%S"), ctx.author))
 
@@ -746,7 +704,6 @@ async def inscription(ctx, action):
             value = "Le maître du jeu doit __obligatoirement__ se trouver dans un channel vocal pour exécuter cette commande.",
             inline = False
         )
-        
         await ctx.channel.send("⚠️ **Erreur de commande** <@{}>".format(ctx.author.id))
         await ctx.channel.send(embed=embed)
     
@@ -761,7 +718,8 @@ async def inscription(ctx, action):
                     
                 if action == "create":
 
-                    insc_loading = await ctx.channel.send("Inscription des joueurs en cours...")
+                    insc_loading = await ctx.channel.send("⚙️ Inscription des joueurs en cours... \nCette action peut prendre du temps.")
+
                     
                     print("create")
 
@@ -804,19 +762,27 @@ async def inscription(ctx, action):
 
                         print(member, emoji_p)
 
-                        dicop_id_to_emoji[member.id] = emoji_p
-                        dicop_emoji[emoji_p] = [member,member.id]
-                        dicop_name_to_emoji[member] = emoji_p
+                        with open('games.json') as f:
+                            data = json.load(f)
+
+                        data[aid]["idtoemoji"][str(member.id)] = emoji_p
+                        data[aid]["dictemoji"][emoji_p] = member.id
+
+                        # On se base par rapport à l'id d'un joueur
+                        # client.get_user(member.id)
+                        # Suppression de dicop_name_to_emoji
+                        # Lp est un dico avec les member id en key
+                        # dicomembers a des id en key
+
+                        with open('games.json', 'w') as f:
+                            json.dump(data, f, indent=4)
+
 
                         await member.add_roles(get(member.guild.roles, name="Joueurs Thiercelieux"))
 
                         await channels[0].send("**{}** a reçu l'emoji {}".format(member,emoji_p))
 
                         recap.append("``{}``: {} \n".format(member, emoji_p))
-
-                        # cr_commands.append("**{}** reçu l'emoji {}".format(member,emoji_p))
-                    
-                    # cr_commands.append("\n")
 
                     await ctx.channel.send("Inscription terminée")
 
@@ -888,31 +854,43 @@ async def inscription(ctx, action):
             await ctx.channel.send(embed=embed)
     
 
-# ==========================================================================================================================================================
 
 @client.command()
 @commands.has_any_role("Maître du Jeu")
-async def remove(ctx, *, member):
+async def remove(ctx, *, member : discord.User):
+    
+    gid = str(ctx.guild.id)
 
-    global dicop_name_to_emoji, dicop_id_to_emoji, dicop_emoji
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
+
+    dicop_id_to_emoji = gdata[aid]["idtoemoji"]
+    dicop_emoji = gdata[aid]["dictemoji"]
 
     member_name, member_discriminator = member.split('#')
 
     rrecap = []
     user_del = None
 
-    for user in dicop_name_to_emoji:
+    for userid in dicop_id_to_emoji:
+        user = client.get_user(int(userid))
 
         if (user.name, user.discriminator) == (member_name, member_discriminator):
             user_del = user
             print("ok")
 
         else:
-            rrecap.append("``{}``: {} \n".format(user, dicop_name_to_emoji[user]))
+            rrecap.append("``{}``: {} \n".format(user, dicop_id_to_emoji[str(userid)]))
 
-    del dicop_emoji[dicop_name_to_emoji[user_del]]
-    del dicop_name_to_emoji[user_del]
-    del dicop_id_to_emoji[user_del.id]
+    del gdata[aid]["dictemoji"][dicop_id_to_emoji[str(user_del.id)]]
+    del gdata[aid]["idtoemoji"][str(user_del.id)]
     await ctx.channel.send("{} a été retiré de la liste des inscrits.".format(user_del))
     print("ok")
 
@@ -930,7 +908,6 @@ async def remove(ctx, *, member):
         icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
     )
 
-    
 
     if user_del == None:
         ctx.channel.send("ERREUR: Cette personne n'est pas dans la liste des inscrits.")
@@ -939,8 +916,6 @@ async def remove(ctx, *, member):
         await ctx.channel.send(embed=embed)
 
 
-# ==========================================================================================================================================================
-
 @client.command()
 @commands.has_any_role("Maître du Jeu")
 async def joueurs(ctx):
@@ -948,23 +923,37 @@ async def joueurs(ctx):
 
     print("Commande .liste exécutée à {} par {}.".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
 
+    gid = str(ctx.guild.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
+    
+    dicop_id_to_emoji = gdata[aid]["idtoemoji"]
+
     recap = []
-    if len(dicop_name_to_emoji) == 0:
+    if len(dicop_id_to_emoji) == 0:
         await ctx.channel.send("Pas encore d'inscrits.")
     else:
         print("ok joueurs aff")
         if len(Lp) != 0:
-            for name in dicop_name_to_emoji:
-                fiche_player = Lp[dicomembers[name]]
+            for nameid in dicop_id_to_emoji:
+                fiche_player = Lp[nameid]
                 rolep = fiche_player[1]
                 if str(rolep) == 'Mort':
                     pass
                 else:
-                    recap.append("``{}``: {} \n".format(name, dicop_name_to_emoji[name]))
+                    recap.append("``{}``: {} \n".format(client.get_user(int(nameid)), dicop_id_to_emoji[nameid]))
         
         else:
-            for name in dicop_name_to_emoji:
-                recap.append("``{}``: {} \n".format(name, dicop_name_to_emoji[name]))
+            for nameid in dicop_id_to_emoji:
+                recap.append("``{}``: {} \n".format(client.get_user(int(nameid)), dicop_id_to_emoji[nameid]))
     
         embed = discord.Embed(
             colour = discord.Color.orange(),
@@ -983,10 +972,6 @@ async def joueurs(ctx):
         await ctx.channel.send(embed=embed)
 
 
-# ==========================================================================================================================================================
-
-
-
 @client.command()
 async def roles(ctx):
 #Permet d'afficher la liste des rôles (envoyé en MP)
@@ -998,7 +983,7 @@ async def roles(ctx):
     else:
         await ctx.channel.send("<@{.id}> La liste des rôles va vous être envoyée par MP.".format(user))
 
-    def Ldivide(L,n): 
+    def Ldivide(L,n):
 
         for i in range(0, len(L), n):  
             yield L[i:i + n]
@@ -1028,7 +1013,7 @@ async def roles(ctx):
                 etitle = "🗡️ Rôles Solo"
 
             elif Lgr == LrA:
-                ecolour = discord.Color.blue()
+                ecolour = discord.Color.from_rgb(254,254,254)
                 etitle = "❓ Rôles Autre"
 
             embed = discord.Embed(
@@ -1058,19 +1043,29 @@ async def roles(ctx):
 
     print("Commande rôles terminée")
 
-# ==========================================================================================================================================================
-
 
 @client.command()
 @commands.has_any_role("Maître du Jeu")
 async def start(ctx, state_couple):
 #Commande de départ
 
-    global cr_commands, cr_chat, mdj, game_started, Lp
+    gid = str(ctx.guild.id)
+    aid = str(ctx.author.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    in_game = data[gid]["in_game"]
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
+
+    Lroles_dispo = gdata[aid]["Lroles"]
+    dicop_id_to_emoji = gdata[aid]["idtoemoji"]
+
     
     print("[{}] Commande .start {} exécutée par {}".format(datetime.now().strftime("%H:%M:%S"), state_couple, ctx.author))
-
-    cr_commands.append("[{}] Commande .start {} exécutée par {}. \n \n".format(datetime.now().strftime("%H:%M:%S"), state_couple, ctx.author))
 
     annoncef = []
     is_sect = False
@@ -1081,43 +1076,31 @@ async def start(ctx, state_couple):
 
     if len(channels) == 0:
         channels_check = '❌'
-        cr_commands.append("[{}] Commande .setup exécutée: Non \n".format(datetime.now().strftime("%H:%M:%S")))
     else:
         channels_check = '✅'
-        cr_commands.append("[{}] Commande .setup exécutée: Oui \n".format(datetime.now().strftime("%H:%M:%S")))
 
 
     if in_game == True:
         create_check = '✅'
-        cr_commands.append("[{}] Commande .create exécutée: Oui \n".format(datetime.now().strftime("%H:%M:%S")))
     else:
         create_check = '❌'
-        cr_commands.append("[{}] Commande .create exécutée: Non \n".format(datetime.now().strftime("%H:%M:%S")))
 
-    if len(dicop_name_to_emoji) == 0:
+    if len(dicop_id_to_emoji) == 0:
         ins_check = '❌'
-        cr_commands.append("[{}] Commande .inscription exécutée: Non \n".format(datetime.now().strftime("%H:%M:%S")))
     else:
         ins_check = '✅'
-        cr_commands.append("[{}] Commande .inscription exécutée: Oui \n".format(datetime.now().strftime("%H:%M:%S")))
 
 
-    if len(dicop_name_to_emoji) == len(Lroles_dispo):
+    if len(dicop_id_to_emoji) == len(Lroles_dispo):
         roles_check = '✅'
-        cr_commands.append("[{}] Même nombre de joueurs que de rôles: Oui \n".format(datetime.now().strftime("%H:%M:%S")))
     else:
         roles_check = '❌'
-        cr_commands.append("[{}] Même nombre de joueurs que de rôles: Non \n".format(datetime.now().strftime("%H:%M:%S")))
 
 
     if state_couple == 'couple' or state_couple == 'non':
         c_check = '✅'
-        cr_commands.append("[{}] Status du couple correct: Oui \n".format(datetime.now().strftime("%H:%M:%S")))
     else:
         c_check = '❌'
-        cr_commands.append("[{}] Status du couple correct: Non \n".format(datetime.now().strftime("%H:%M:%S")))
-
-    cr_commands.append("[{}] Paramètre entré: {} \n".format(datetime.now().strftime("%H:%M:%S"), state_couple))
 
     if roles_check == '✅' and ins_check == '✅' and create_check == '✅' and channels_check == '✅' and c_check == '✅':
         ecolour = discord.Color.green()
@@ -1206,8 +1189,6 @@ async def start(ctx, state_couple):
 
         compteur = 0
 
-        cr_chat.append("[{}] Début de l'enregistrement des messages des channels. \n \n".format(datetime.now().strftime("%H:%M:%S")))
-
         Lroles_game = [k for k in Lroles_dispo]
         # Distribution des rôles
 
@@ -1270,26 +1251,22 @@ async def start(ctx, state_couple):
 
                 annoncef.append("``{0.name}`` ({1}) a le rôle __{2}__ \n".format(member, dicop_name_to_emoji[member], role_given))
                 
-
-                Lp.append([
-                    str(member),        # Lp[i][0] = joueur#xxxx
-                    role_given,         # Lp[i][1] = rôle servant pour l'affichage
-                    str(member.id),     # Lp[i][2] = discord id
-                    member,             # Lp[i][3] = class membre
-                    'Non',              # Lp[i][4] = status couple
-                    'Non',              # Lp[i][5] = status maître (ou enfant)
-                    role_given,         # Lp[i][6] = rôle servant pour les perms et l'annonce de victoire        
-                    'Non',              # Lp[i][7] = status charmé
-                    'Non',              # Lp[i][8] = status secte
-                    'Non',              # Lp[i][9] = status infecté
-                    dicop_id_to_emoji[member.id], # Lp[i][10] = emoji du membre
-                    'Non',              # Lp[i][10] = status imposteur (LG)
-                    'Non',              # Lp[i][11] = rôle imposteur
-                    'Non',              # Lp[i][12] = rôle traître
-                    'Non'               # Lp[i][13] = peut voter
-                    ])             
-
-                dicomembers[member] = compteur
+                gdata[aid]["Lp"][str(member.id)] = [
+                    str(member),                            # 0: joueur
+                    role_given,                             # 1: rôle
+                    'Non',                                  # 2: couple
+                    'Non',                                  # 3: maitre/enfant
+                    'Non',                                  # 4: charmé
+                    'Non',                                  # 5: secte
+                    'Non',                                  # 6: infecté
+                    'Non',                                  # 7: imposteur
+                    'Non',                                  # 8: rôle imposteur (LG)
+                    'Non',                                  # 9: rôle traître
+                    'Non',                                  # 10: peut voter
+                    dicop_id_to_emoji[str(member.id)]       # 11: emoji joueur
+                ]   
+          
+                gdata[aid]["dicomembers"][str(member.id)] = compteur
                 compteur += 1
 
                 if role_given == 'Sectaire':
@@ -1321,7 +1298,7 @@ async def start(ctx, state_couple):
             if role_traitre in dicoroles:
                 await channels[dicoroles[role_traitre]].set_permissions(member, overwrite=can_talk)
 
-            Lp[dicomembers[membertraitre]][12] = role_traitre
+            gdata[aid]["Lp"][str(membertraitre.id)][9] = role_traitre
 
 
         if 'Imposteur' in Lroles_dispo:
@@ -1352,10 +1329,9 @@ async def start(ctx, state_couple):
 
             embed_panel.set_author(name = "Panel de choix Imposteur")
             embed_panel.add_field(
-                name ="Choix de l'imposteur", 
-                value = "Vous avez **30 secondes** pour choisir un rôle, sinon il vous sera attribué aléatoirement. \nRéagissez à '🥇' pour choisir le rôle **__{}__**. \nRéagissez à '🥈' pour choisir le rôle **__{}__**."format(arg1,arg2), 
-                inline = False
-            )
+                name ="Choix de l'imposteur",
+                value = "Vous avez **30 secondes** pour choisir un rôle, sinon il vous sera attribué aléatoirement. \nRéagissez à '🥇' pour choisir le rôle **__{}__**. \nRéagissez à '🥈' pour choisir le rôle **__{}__**.".format(arg1,arg2),
+                inline = False)
             current_panel = await memberimp.send(embed=embed_panel)
 
             await current_panel.add_reaction('🥇')
@@ -1383,12 +1359,13 @@ async def start(ctx, state_couple):
                 if roleimp in dicoroles:
                     await channels[dicoroles[roleimp]].set_permissions(memberimp, overwrite=can_talk)
                     if roleimp in liste_LG:
-                        Lp[dicomembers[memberimp]][10] = 'LG'
+                        gdata[aid]["Lp"][str(memberimp.id)][8] = 'LG'
                         if roleimp == 'LGB' or roleimp == 'Infect':
                             await channels[8].set_permissions(memberimp, overwrite=can_talk)
                 await reaction.message.delete()
 
-
+        # A FINIR/FIX
+        """
         if "Sectaire" in Lroles_dispo:
             Ltemps = [k for k in Lp]
             pop_sect = int(nbp/2)
@@ -1404,32 +1381,31 @@ async def start(ctx, state_couple):
                 if Ltemps[irdm][1] != 'Sectaire':
                     sect.append(Ltemps[irdm][3])
                     Ltemps.pop(irdm)
-                    Lp[irdm][8] = "Secte"
+                    gdata[aid]["Lp"][irdm][8] = "Secte"
             
             await ctx.channel.send("Liste des joueurs à tuer pour le sectaire: **{}**.".format(', '.join(sect)))
             await membersect.send("Liste des joueurs à tuer: {}.".format(', '.join(sect)))
 
             annoncef.append("\n Liste des membres à tuer pour le Sectaire: ``{}`` \n".format(', '.join(sect)))
+        """
             
-
-        print(Lp)
         temps1 = (time.time() - start_time)
         # await ctx.channel.send("Commande exécutée en {} secondes".format(temps1))
 
         if state_couple == 'couple':
 
-            L = [k for k in members if str(k) != str(author) or str(Lp[dicomembers[k]][1]) != 'Jaloux']
+            L = [k for k in members if str(k) != str(author) or str(gdata[aid]["Lp"][str(k.id)][1]) != 'Jaloux']
             
             i1 = rdm.randint(0,len(L)-1)
             if str(L[i1]) != author:
                 amant1 = L[i1]
-                Lp[dicomembers[L[i1]]][4] = 'Oui'
+                gdata[aid]["Lp"][str(L[i1].id)][2] = 'Oui'
                 L.pop(i1)
 
             i2 = rdm.randint(0,len(L)-1)
             if str(L[i2]) != author:
                 amant2 = L[i2]
-                Lp[dicomembers[L[i2]]][4] = 'Oui'
+                gdata[aid]["Lp"][str(L[i2].id)][2] = 'Oui'
                 L.pop(i2)
 
             await channels[6].set_permissions(amant1, overwrite=can_see)
@@ -1458,8 +1434,13 @@ async def start(ctx, state_couple):
         
         await ctx.channel.send("Lancement de la partie terminé.")
         await ctx.channel.send(embed=embed)
-        game_started = True
-        await menu(ctx)
+
+        gdata[aid]["game_started"] = True
+
+        with open('games.json', 'w') as f:
+            json.dump(data, f, indent=4)
+
+        await menu(ctx, ctx.author)
 
     
     else:
@@ -1479,14 +1460,8 @@ async def start(ctx, state_couple):
             value = "Veuillez vérifier le lancement de la partie par rapport au récapitulatif ci-dessus.", 
             inline = False)
 
-
-        cr_commands.append("[{}] Erreur (commende .start): le lancement de la partie a échoué. \n \n".format(datetime.now().strftime("%H:%M:%S")))
         await ctx.channel.send(embed=embede)
 
-
-
-
-# ==========================================================================================================================================================
 
 @client.command()
 @commands.has_any_role("Maître du Jeu")
@@ -1497,13 +1472,26 @@ async def fmenu(ctx):
 
 async def menu(ctx):
 
+    gid = str(ctx.guild.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+    
+    aid = str(data[gid]["mdj"])
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
+
+    game_started = gdata[aid]["game_started"]
+    day = gdata[aid]["day"]
+
     panel = discord.Embed(
             colour = discord.Color.green()
         ) 
 
     emojis_action = ["🐺", "🔪", "👒", "🔇", "🔊", "🌙", "🧒", "❤️", "💤", "🕵️", "🎺", "🌞","🛑","📔"]
 
-    if game_started == True:    # ATTENTION NE PAS OUBLIER DE CHANGER EN FALSE
+    if game_started == False:    # ATTENTION NE PAS OUBLIER DE CHANGER EN FALSE
 
         await ctx.channel.send("La partie n'a pas encore commencé. Le menu n'est pas encore disponible.")
 
@@ -1630,29 +1618,18 @@ async def menu(ctx):
         
         reaction, user = await client.wait_for("reaction_add", check=checkMenu)
         await reaction.message.delete()
+
+        d = {"🧒": 'Enfant', "🕵️": 'Voleur', "🐺": 'Infect', "👒": 'Servante', "💤": 'Noctambule', "🔪": 'Kill'}
+
+
         if reaction.emoji == "❤️":
             await cupidon_panel(reaction.message)
-
-        elif reaction.emoji == "🧒":
-            await enfant_panel(reaction.message)
-
-        elif reaction.emoji == "🕵️":
-            await voleur_panel(reaction.message)
-
-        elif reaction.emoji == "🐺":
-            await infect_panel(reaction.message)
-            
+        
         elif reaction.emoji == "🎺":
             await charm_panel(reaction.message)
-
-        elif reaction.emoji == "👒":
-            await servante_panel(reaction.message)
-
-        elif reaction.emoji == "💤":
-            await noctambule_panel(reaction.message)
-
-        elif reaction.emoji == "🔪":
-            await kill_panel(reaction.message)
+        
+        elif reaction.emoji in d:
+            await action_panel(reaction.message, d[reaction.emoji])
 
         elif reaction.emoji == "🔇":
             await mute(reaction.message, "mute")
@@ -1673,23 +1650,28 @@ async def menu(ctx):
             await vote_panel(reaction.message)
 
 
-
-
-
-
-
-
-# ==========================================================================================================================================================
-
-
 async def jour(ctx, dtime):
-
-    global Lp, day, cpt_jour
-
-    author = mdj
 
     channel = author.voice.channel
     members = channel.members
+
+    gid = str(ctx.guild.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
+
+    game_started = gdata[aid]["game_started"]
+    cpt_jour = gdata[aid]["cpt_jour"]
+    day = gdata[aid]["day"]
+    dicomembers = gdata[aid]["dicomembers"]
+    dicop_id_to_emoji = gdata[aid]["idtoemoji"]
+    Lp = gdata[aid]["Lp"]
 
     is_cover = False
     is_devin = False
@@ -1709,19 +1691,21 @@ async def jour(ctx, dtime):
         if dtime == 'nuit':
 
             if day == True:
-                cpt_jour += 1
 
-                day = False
+                gdata[aid]["cpt_jour"] += 1
+                gdata[aid]["day"] = False
          
-                for member in dicomembers:
+                for memberid in dicomembers:
+
+                    member = client.get_user(int(memberid))
 
                     await member.edit(mute=True)
                     await channels[2].set_permissions(member, overwrite=can_see) 
 
-                    rol = Lp[dicomembers[member]][1]
-                    statusc = Lp[dicomembers[member]][4]
-                    status_infect = Lp[dicomembers[member]][9]
-                    status_impost = Lp[dicomembers[member]][10]
+                    rol = Lp[str(memberid)][1]
+                    statusc = Lp[str(memberid)][2]
+                    status_infect = Lp[str(memberid)][8]
+                    status_impost = Lp[str(memberid)][9]
                     
                     if rol == 'LG' or rol == 'LGB' or rol == 'IPDL' or rol == 'LGA' or (rol == 'Enfant' and is_enfant == True) or status_infect == 'Infecté' or (rol == 'Imposteur' and status_impost == 'LG'):
                         await channels[8].set_permissions(member, overwrite=can_talk)
@@ -1732,9 +1716,9 @@ async def jour(ctx, dtime):
 
                 while is_cover == False:
                     if 'LGA' in Lroles_dispo:
-                        imember = rdm.choice(list(dicomembers.values()))
-                        await channels[8].send("La couverture du LGA cette nuit est: {}.".format(Lp[dicomembers[imember]][1]))
-                        await channels[0].send("La couverture du LGA cette nuit est: {}.".format(Lp[dicomembers[imember]][1]))
+                        imember = rdm.choice(list(dicomembers.keys()))
+                        await channels[8].send("La couverture du LGA cette nuit est: {}.".format(Lp[imember][1]))
+                        await channels[0].send("La couverture du LGA cette nuit est: {}.".format(Lp[imember][1]))
                         if cpt_jour == 1 and 'Oeil' in Lroles_dispo:
                             await channels[23].send("La couverture du LGA cette nuit est: {}.".format(Lp[dicomembers[imember]][1]))
                         is_cover = True
@@ -1744,7 +1728,7 @@ async def jour(ctx, dtime):
 
                 while is_devin == False:
                     if "Devin" in Lroles_dispo:
-                        imember = rdm.choice(list(dicomembers.values()))
+                        imember = rdm.choice(list(dicomembers.keys()))
                         if Lp[dicomembers[imember]][1] == 'Devin':
                             pass
                         else:
@@ -1758,14 +1742,10 @@ async def jour(ctx, dtime):
                 
                 embedn = discord.Embed(
                     title = "NUIT: Le village s'endort.",
+                    description = "Nous sommes à la nuit **N°{}**".format(cpt_jour),
                     colour = discord.Color.dark_blue()
                 )
 
-                embedn.add_field(
-                    name = "Nous sommes à la nuit __N°{}__".format(cpt_jour),
-                    value = "\a",
-                    inline = False
-                )
                 embedn.set_author(
                     name = "LG Bot",
                     icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
@@ -1773,7 +1753,7 @@ async def jour(ctx, dtime):
 
                 await channels[2].send(embed=embedn)
 
-                Laffichage_day = ["``{0.name}``: {1} (Rôle: __{2}__) \n".format(name, dicop_name_to_emoji[name], Lp[dicomembers[name]][1]) for name in dicop_name_to_emoji]
+                Laffichage_day = ["``{0.name}``: {1} (Rôle: __{2}__) \n".format(client.get_user(int(idm)), dicop_id_to_emoji[idm], Lp[idm][1]) for idm in dicop_id_to_emoji]
 
                 embed = discord.Embed(
                     title = "Informations partie",
@@ -1796,17 +1776,19 @@ async def jour(ctx, dtime):
         if dtime == 'jour':
             if day == False:
  
-                day = True
+                gdata[aid]["day"] = True
                 
-                for member in dicomembers:
+                for memberid in dicomembers:
+
+                    member = client.get_user(int(memberid))
 
                     await member.edit(mute=False)
                     await channels[2].set_permissions(member, overwrite=can_talk)
 
-                    rol = Lp[dicomembers[member]][1]
-                    statusc = Lp[dicomembers[member]][4]
-                    status_infect = Lp[dicomembers[member]][9]
-                    status_impost = Lp[dicomembers[member]][10]
+                    rol = Lp[str(memberid)][1]
+                    statusc = Lp[str(memberid)][2]
+                    status_infect = Lp[str(memberid)][8]
+                    status_impost = Lp[str(memberid)][9]
 
                     check_LG = False
                     if rol == 'LG' or rol == 'LGB' or rol == 'IPDL' or rol == 'LGA' or (rol == 'Enfant' and is_enfant == True) or status_infect == 'Infecté' or (rol == 'Imposteur' and status_impost == 'LG'):
@@ -1833,14 +1815,10 @@ async def jour(ctx, dtime):
 
                 embedj = discord.Embed(
                     title = "JOUR: Le village se réveille.",
+                    description = "Nous sommes au jour **N°{}**".format(cpt_jour),
                     colour = discord.Color.dark_gold()
                 )
 
-                embedj.add_field(
-                    name = "Nous sommes au jour __N°{}__".format(cpt_jour),
-                    value = "\a",
-                    inline = False
-                )
                 embedj.set_author(
                     name = "LG Bot",
                     icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
@@ -1848,7 +1826,7 @@ async def jour(ctx, dtime):
 
                 await channels[2].send(embed=embedj)
 
-                Laffichage_day = ["``{0.name}``: {1} (Rôle: __{2}__) \n".format(name, dicop_name_to_emoji[name], Lp[dicomembers[name]][1]) for name in dicop_name_to_emoji]
+                Laffichage_day = ["``{0.name}``: {1} (Rôle: __{2}__) \n".format(client.get_user(int(idm)), dicop_id_to_emoji[idm], Lp[idm][1]) for idm in dicop_id_to_emoji]
 
                 embed = discord.Embed(
                     title = "Informations partie",
@@ -1867,18 +1845,119 @@ async def jour(ctx, dtime):
 
                 await channels[0].send(embed=embed)
 
+    with open('games.json', 'w') as f:
+        json.dump(gdata, f, indent=4)
+
     await menu(ctx)
 
 
+async def action_panel(ctx, action):
+    # Actions: Enfant, Voleur, Infect, Kill, Noctambule, Servante
 
-# ==========================================================================================================================================================
+    gid = str(ctx.guild.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
+
+    dicop_id_to_emoji = gdata[aid]["idtoemoji"]
+    dicop_emoji = gdata[aid]["dictemoji"]
+
+    d = {'Enfant': "désigner le joueur qui sera le maître de l'enfant", 'Voleur': "désigner le joueur qui sera volé", 'Infect': "désigner le joueur qui sera infecté", 'Kill': "désigner le joueur qui va mourir", 'Noctambule': "désigner le joueur visé par le Noctambule", 'Servante': "désigner le joueur visé par la Servante"}
+
+    embed_panel = discord.Embed(
+        colour = discord.Color.green()
+    )
+
+    embed_panel.set_author(
+        name = "Panel de choix action {}".format(action),
+        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
+    )
+
+    embed_panel.add_field(
+        name ='Les emojis des joueurs sont rappelés chaque nuit.', 
+        value = "Réagissez à un émoji joueur pour **{}**. \n \nRéagissez à l'émoji ❌ pour **annuler la commande**.".format(d[action]), 
+        inline = False
+    )
+
+    panel = await ctx.channel.send(embed=embed_panel)
+
+    print(action)
+
+    for nameid in dicop_id_to_emoji:
+        name = client.get_user(int(nameid))
+        print(name)
+        fiche_player = Lp[nameid]
+        print(fiche_player[1])
+        if action == 'Enfant' and str(fiche_player[1]) == 'Enfant':
+            print("ok e")
+            n_enfant = nameid
+        elif action == 'Voleur' and str(fiche_player[1]) == 'Voleur':
+            n_voleur = nameid
+        elif (action == 'Infect') and (str(fiche_player[1]) == 'LG' or str(fiche_player[1]) == 'LGA' or str(fiche_player[1]) == 'LGB' or str(fiche_player[1]) == 'IPDL' or str(fiche_player[1]) == 'GML' or fiche_player[9] == 'Infecté' or (str(fiche_player[1]) == 'Enfant' and is_enfant == True)):
+            pass
+        elif (action == "Noctambule") and (str(fiche_player[1]) == 'Noctambule' or fiche_player[8] == 'Noctambule' or fiche_player[9] == 'Noctambule'):
+            n_noctambule = nameid
+        elif (action == 'Servante') and (str(fiche_player[1]) == 'Servante' or fiche_player[8] == 'Servante' or fiche_player[9] == 'Servante'):
+            n_servante = nameid
+        else:
+            print("ok")
+            await panel.add_reaction(dicop_id_to_emoji[nameid])
+    await panel.add_reaction("❌")
+
+
+    def check(reaction, user):
+        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == panel.id)
+
+    try:
+        reaction, user = await client.wait_for("reaction_add", check=check, timeout=30.0)
+    except asyncio.TimeoutError:
+        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
+        await panel.delete()
+        await menu(ctx)
+    else:
+        if str(reaction.emoji) == non:
+            await ctx.channel.send("Commande annulée")
+            await reaction.message.delete()
+            await menu(ctx)
+        else:
+            if action == 'Enfant':
+                await enfant_action(reaction.message, str(dicop_emoji[reaction.emoji]), n_enfant, auth)
+            elif action == 'Voleur':
+                await voleur_action(reaction.message, str(dicop_emoji[reaction.emoji]), n_voleur, 'Voleur', auth)
+            elif action == 'Infect':
+                await infect_action(reaction.message, str(dicop_emoji[reaction.emoji]), auth)
+            elif action == 'Kill':
+                await kill_action(reaction.message, str(dicop_emoji[reaction.emoji]), 'Kill', auth)
+            elif action == 'Noctambule':
+                await noctambule_action(reaction.message, str(dicop_emoji[reaction.emoji]), n_noctambule, auth)
+            elif action == 'Servante':
+                await voleur_action(reaction.message, str(dicop_emoji[reaction.emoji]), n_servante, 'Servante', auth)
+                await kill_action(reaction.message, str(dicop_emoji[reaction.emoji]), 'Servante', auth)
 
 
 async def cupidon_panel(ctx):
 
-    global cr_commands
+    gid = str(ctx.guild.id)
 
-    cr_commands.append("[{}] Action Cupidon exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
+
+    dicop_id_to_emoji = gdata[aid]["idtoemoji"]
+    dicop_emoji = gdata[aid]["dictemoji"]
 
     lc = []
 
@@ -1893,15 +1972,15 @@ async def cupidon_panel(ctx):
 
     embed_panel.add_field(
         name ='Les emojis des joueurs sont rappelés chaque nuit.', 
-        value = "Réagissez aux 2 émojis joueurs pour **désigner les joueurs qui seront en couple**. \n \n Réagissez à l'emoji ✅ pour **confirmer votre choix**. \n \n Réagissez à l'émoji ❌ pour **annuler la commande**.", 
+        value = "Réagissez aux 2 émojis joueurs pour **désigner les joueurs qui seront en couple**. \n \nRéagissez à l'émoji ❌ pour **annuler la commande**.", 
         inline = False
     )
 
     await ctx.channel.send("Veuillez choisir le 1e amant")
     current_panel = await ctx.channel.send(embed=embed_panel)
 
-    for name in dicop_name_to_emoji:
-        await current_panel.add_reaction(dicop_name_to_emoji[name])
+    for nameid in dicop_id_to_emoji:
+        await current_panel.add_reaction(dicop_id_to_emoji[nameid])
     await current_panel.add_reaction("❌")
 
     def checkCupi(reaction, user):
@@ -1919,180 +1998,120 @@ async def cupidon_panel(ctx):
             await reaction.message.delete()
             await menu(ctx)
         else:
-            lc.append(dicop_emoji[reaction.emoji][0])
+            lc.append(dicop_emoji[reaction.emoji])
             reaction.message.delete()
             await ctx.channel.send("Veuillez choisir le 2e amant")
             panel2 = await ctx.channel.send(embed=embed_panel)
-            for name in dicop_name_to_emoji:
-                if name not in lc:
-                    await panel2.add_reaction(dicop_name_to_emoji[name])
+            for nameid in dicop_id_to_emoji:
+                if nameid not in lc:
+                    await panel2.add_reaction(dicop_id_to_emoji[nameid])
+
+            def checkCupi2(reaction, user):
+                return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == panel2.id)
+
             try:
-                reaction, user = await client.wait_for("reaction_add", check=checkCupi, timeout=30.0)
+                reaction, user = await client.wait_for("reaction_add", check=checkCupi2, timeout=30.0)
             except asyncio.TimeoutError:
                 await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
                 await panel2.delete()
                 await menu(ctx)
             else:
-                lc.append(dicop_emoji[reaction.emoji][0])
-                await enfant_action(ctx, lc)
+                lc.append(dicop_emoji[reaction.emoji])
+                await cupidon_action(reaction.message, lc)
 
 
 
 async def cupidon_action(ctx, liste_couple):
 
-    global Lp
+    gid = str(ctx.guild.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
+
+    dicop_id_to_emoji = gdata[aid]["idtoemoji"]
+    dicop_emoji = gdata[aid]["dictemoji"]
+    Lp = gdata[aid]["Lp"]
 
     cpl1 = liste_couple[0]
     cpl2 = liste_couple[1]
 
-    Lp[dicomembers[cpl1]] = 'Couple'
-    Lp[dicomembers[cpl2]] = 'Couple'
+    gdata[aid]["Lp"][str(cpl1)][2] = 'Couple'
+    gdata[aid]["Lp"][str(cpl2)][2] = 'Couple'
 
     await channels[6].set_permissions(cpl1, overwrite=can_see)
     await channels[6].set_permissions(cpl2, overwrite=can_see)
-    await cpl1.send("Tu es en couple avec **{.name}** \nTu as maintenant accès à un channel privé avec cette personne.".format(cpl2))
-    await cpl2.send("Tu es en couple avec **{.name}** \nTu as maintenant accès à un channel privé avec cette personne.".format(cpl1))
+    await client.get_user(cpl1).send("Tu es en couple avec **{.name}** \nTu as maintenant accès à un channel privé avec cette personne.".format(cpl2))
+    await client.get_user(cpl2).send("Tu es en couple avec **{.name}** \nTu as maintenant accès à un channel privé avec cette personne.".format(cpl1))
     await ctx.channel.send("Liste des amants: **{}** et **{}**".format(cpl1,cpl2))
     await ctx.delete()
 
+    with open('games.json', 'w') as f:
+        json.dump(gdata, f, indent=4)
     await menu(ctx)
 
 
+async def enfant_action(ctx, maitreid, enfantid):
 
-# ==========================================================================================================================================================
+    with open('guilds.json') as f:
+        data = json.load(f)
 
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
 
-async def enfant_panel(ctx):
+    with open('games.json') as gf:
+        gdata = json.load(gf)
 
-    global cr_commands
+    Lp = gdata[aid]["Lp"]
 
-    cr_commands.append("[{}] Action Enfant exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
+    gdata[aid]["Lp"][maitreid][3] = 'Maitre'
+    gdata[aid]["Lp"][enfantid][3] = 'Enfant'
 
-    embed_panel = discord.Embed(
-        colour = discord.Color.from_rgb(100,50,0)
-    )
-
-    embed_panel.set_author(
-        name = "Panel de choix commande enfant",
-        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-    )
-
-    embed_panel.add_field(
-        name ='Les emojis des joueurs sont rappelés chaque nuit.', 
-        value = "Réagissez à un émoji joueur pour **désigner le joueur qui sera le maître de l'enfant**. \n \n Réagissez à l'emoji ✅ pour **confirmer votre choix**. \n \n Réagissez à l'émoji ❌ pour **annuler la commande**.", 
-        inline = False
-    )
-    
-    current_panel = await ctx.channel.send(embed=embed_panel)
-
-    for name in dicop_name_to_emoji:
-        fiche_player = Lp[dicomembers[name]]
-        if str(fiche_player[1]) == 'Enfant':
-            n_enfant = name
-        else:
-            await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("❌")
-
-    def checkEnfant(reaction, user):
-        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
-
-    try:
-        reaction, user = await client.wait_for("reaction_add", check=checkEnfant, timeout=30.0)
-    except asyncio.TimeoutError:
-        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
-        await current_panel.delete()
-        await menu(ctx)
-    else:
-        if str(reaction.emoji) == non:
-            await ctx.channel.send("Commande annulée")
-            await reaction.message.delete()
-            await menu(ctx)
-        else:
-            await enfant_action(ctx, dicop_emoji[reaction.emoji][0], n_enfant)
-
-
-async def enfant_action(ctx, maitre_name, enfant_name):
-
-    global Lp
-
-    fiche_maitre = Lp[dicomembers[maitre_name]]
-    fiche_maitre[5] = 'Maitre'
-    fiche_enfant = Lp[dicomembers[enfant_name]]
-    fiche_enfant[5] = 'Enfant'
-    fiche_enfant[6] = 'Villageois'
-    await ctx.channel.send("{} est le maître de {}.".format(str(maitre_name), str(enfant_name)))
+    await ctx.channel.send("{} est le maître de {}.".format(client.get_user(int(maitreid)), client.get_user(int(enfantid))))
     await ctx.delete()
 
+    with open('games.json', 'w') as jf:
+        json.dump(gdata, jf, indent=4)
+
     await menu(ctx)
 
 
-# ==========================================================================================================================================================
+async def voleur_action(ctx, stolenid, voleurid, step):
 
+    gid = str(ctx.guild.id)
 
-async def voleur_panel(ctx):
+    with open('guilds.json') as f:
+        data = json.load(f)
 
-    global cr_commands
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
 
-    cr_commands.append("[{}] Action Voleur exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
+    with open('games.json') as gf:
+        gdata = json.load(gf)
 
-    embed_panel = discord.Embed(
-        colour = discord.Color.from_rgb(50,60,110)
-    )
+    Lp = gdata[aid]["Lp"]
 
-    embed_panel.set_author(
-        name = "Panel de choix commande voleur",
-        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-    )
-
-    embed_panel.add_field(
-        name ='Les emojis des joueurs sont rappelés chaque nuit.', 
-        value = "Réagissez à un émoji joueur pour **désigner le joueur qui sera volé**. \n \nRéagissez à l'emoji ✅ pour **confirmer votre choix**. \n \nRéagissez à l'émoji ❌ pour **annuler la commande**. \n \nVous avez ``30 secondes`` pour répondre.", 
-        inline = False
-    )
-
-    current_panel = await ctx.channel.send(embed=embed_panel)
-
-    for name in dicop_name_to_emoji:
-        fiche_player = Lp[dicomembers[name]]
-        if str(fiche_player[1]) == 'Voleur':
-            n_voleur = name
-        else:
-            await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("❌")
-
-    def checkVoleur(reaction, user):
-        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
-
-    try:
-        reaction, user = await client.wait_for("reaction_add", check=checkVoleur, timeout=30.0)
-    except asyncio.TimeoutError:
-        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
-        await current_panel.delete()
-        await menu(ctx)
-    else:
-        if str(reaction.emoji) == non:
-            await ctx.channel.send("Commande annulée")
-            await reaction.message.delete()
-            await menu(ctx)
-        else:
-            await voleur_action(ctx, dicop_emoji[reaction.emoji][0], n_voleur, 'Voleur')
-
-
-async def voleur_action(ctx, stolen_name, voleur_name, step):
-
-    global Lp
-
-    fiche_stolen = Lp[dicomembers[stolen_name]]
+    fiche_stolen = Lp[stolenid]
     role_stolen = fiche_stolen[1]
 
-    fiche_voleur = Lp[dicomembers[voleur_name]]
+    fiche_voleur = Lp[voleurid]
     role_voleur = fiche_voleur[1]
 
-    fiche_stolen[1],fiche_voleur[1] = role_voleur,role_stolen
+    gdata[aid]["Lp"][stolenid][1],gdata[aid]["Lp"][voleurid][1] = role_voleur,role_stolen
 
     if role_stolen == 'Enfant':
-        fiche_voleur[5] = 'Enfant'
-        fiche_stolen[5] = 'Non'
+        gdata[aid]["Lp"][voleurid][3] = 'Enfant'
+        gdata[aid]["Lp"][stolenid][3] = 'Non'
+
+    voleur_name = client.get_user(int(voleurid))
+    stolen_name = client.get_user(int(stolenid))
 
     if role_stolen in dicoroles:
         print(role_stolen, "voleur dicoroles")
@@ -2109,92 +2128,65 @@ async def voleur_action(ctx, stolen_name, voleur_name, step):
     await ctx.channel.send("{} a volé le rôle de {}, qui était {}.".format(str(voleur_name),str(stolen_name),str(role_stolen)))
     await ctx.delete()
 
+    with open('games.json', 'w') as jf:
+        json.dump(gdata, jf, indent=4)
+
     if step == 'Voleur':
         await menu(ctx)
 
 
+async def infect_action(ctx, infectid):
 
-# ==========================================================================================================================================================
+    gid = str(ctx.guild.id)
 
+    with open('guilds.json') as f:
+        data = json.load(f)
 
-async def infect_panel(ctx):
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
 
-    global cr_commands
+    with open('games.json') as gf:
+        gdata = json.load(gf)
 
-    cr_commands.append("[{}] Action Infect exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
+    Lp = gdata[aid]["Lp"]
+    day = gdata[aid]["day"]
 
-    embed_panel = discord.Embed(
-        colour = discord.Color.from_rgb(100,0,0)
-    )
-
-    embed_panel.set_author(
-        name = "Panel de choix commande infect",
-        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-    )
-
-    embed_panel.add_field(
-        name ='Les emojis des joueurs sont rappelés chaque nuit.', 
-        value = "Réagissez à un émoji joueur pour **désigner le joueur qui sera infecté**. \n \n Réagissez à l'emoji ✅ pour **confirmer votre choix**. \n \n Réagissez à l'émoji ❌ pour **annuler la commande**.", 
-        inline = False
-    )
-
-    current_panel = await ctx.channel.send(embed=embed_panel)
-
-    for name in dicop_name_to_emoji:
-        fiche_player = Lp[dicomembers[name]]
-        if str(fiche_player[1]) == 'LG' or str(fiche_player[1]) == 'LGA' or str(fiche_player[1]) == 'LGB' or str(fiche_player[1]) == 'IPDL' or str(fiche_player[1]) == 'GML' or fiche_player[9] == 'Infecté' or (str(fiche_player[1]) == 'Enfant' and is_enfant == True):
-            pass
-        else:    
-            await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("❌")
-
-    def checkInfect(reaction, user):
-        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
-
-    try:
-        reaction, user = await client.wait_for("reaction_add", check=checkInfect, timeout=30.0)
-    except asyncio.TimeoutError:
-        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
-        await current_panel.delete()
-        await menu(ctx)
-    else:
-        if str(reaction.emoji) == non:
-            await ctx.channel.send("Commande annulée")
-            await reaction.message.delete()
-            await menu(ctx)
-        else:
-            await infect_action(ctx, dicop_emoji[reaction.emoji][0])
-
-
-async def infect_action(ctx, infect_name):
-
-    global Lp
-
-    pi = Lp[dicomembers[infect_name]]
+    infect_name = client.get_user("infectid")
 
     if day == True:
         await channels[8].set_permissions(infect_name, overwrite=can_see)
     elif day == False:
         await channels[8].set_permissions(infect_name, overwrite=can_talk)
 
-    pi[9] = 'Infecté'
+    gdata[aid]["Lp"][infectid][6] = 'Infecté'
 
     await infect_name.send("Tu as été infécté, tu es maintenant dans le camp des Loup-garous.")
     await ctx.channel.send("{} a été infécté.".format(str(infect_name)))
     await ctx.delete()
 
+    with open('games.json', 'w') as jf:
+        json.dump(gdata, jf, indent=4)
+
     await menu(ctx)
-
-
-
-# ==========================================================================================================================================================
 
 
 async def charm_panel(ctx):
 
-    global cr_commands
+    gid = str(ctx.guild.id)
 
-    cr_commands.append("[{}] Action JDF exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
+
+    Lp = gdata[aid]["Lp"]
+    dicop_id_to_emoji = gdata[aid]["idtoemoji"]
 
     lc = []
 
@@ -2209,18 +2201,18 @@ async def charm_panel(ctx):
 
     embed_panel.add_field(
         name ='Les emojis des joueurs sont rappelés chaque nuit.', 
-        value = "Réagissez à un ou plusieurs émoji(s) joueur(s) pour **désigner le ou les joueurs qui seront charmés**. \n \n Réagissez à l'emoji ✅ pour **confirmer votre choix**. \n \n Réagissez à l'émoji ❌ pour **annuler la commande**.", 
+        value = "Réagissez à un ou plusieurs émoji(s) joueur(s) pour **désigner le ou les joueurs qui seront charmés**. \n \n Réagissez à l'émoji ❌ pour **annuler la commande**.", 
         inline = False
     )
 
     current_panel = await ctx.channel.send(embed=embed_panel)
 
-    for name in dicop_name_to_emoji:
-        fiche_player = Lp[dicomembers[name]]
-        if str(fiche_player[1]) == 'JDF' or fiche_player[7] == 'Charmé':
+    for nameid in dicop_id_to_emoji:
+        fiche_player = Lp[nameid]
+        if str(fiche_player[1]) == 'JDF' or fiche_player[4] == 'Charmé':
             pass      
         else:
-            await current_panel.add_reaction(dicop_name_to_emoji[name])
+            await current_panel.add_reaction(dicop_id_to_emoji[nameid])
     await current_panel.add_reaction("❌")
 
     def checkCharm(reaction, user):
@@ -2238,111 +2230,100 @@ async def charm_panel(ctx):
             await reaction.message.delete()
             await menu(ctx)
         else:
-            lc.append(dicop_emoji[reaction.emoji][0])
-            reaction.message.delete()
+            lc.append(dicop_emoji[reaction.emoji])
+            await reaction.message.delete()
             await ctx.channel.send("Si vous ne souhaitez charmer qu'une seule personne, réagissez à l'émoji ❌")
             panel2 = await ctx.channel.send(embed=embed_panel)
-            for name in dicop_name_to_emoji:
-                if name not in lc:
-                    await panel2.add_reaction(dicop_name_to_emoji[name])
+            for nameid in dicop_id_to_emoji:
+                fiche_player = Lp[nameid]
+                if str(fiche_player[1]) == 'JDF' or fiche_player[4] == 'Charmé':
+                    pass  
+                elif int(nameid) in lc:
+                    pass
+                else:
+                    await panel2.add_reaction(dicop_id_to_emoji[nameid])
             await panel2.add_reaction("❌")
+
+            def checkCharm2(reaction, user):
+                return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == panel2.id)
+
             try:
-                reaction, user = await client.wait_for("reaction_add", check=checkCupi, timeout=30.0)
+                reaction, user = await client.wait_for("reaction_add", check=checkCharm2, timeout=30.0)
             except asyncio.TimeoutError:
                 await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
                 await panel2.delete()
                 await menu(ctx)
             else:
                 if reaction.emoji in dicop_emoji:
-                    lc.append(dicop_emoji[reaction.emoji][0])
-                await charm_action(ctx, lc)
+                    lc.append(dicop_emoji[reaction.emoji])
+                await charm_action(reaction.message, lc)
 
 
 async def charm_action(ctx, liste_charm):
 
-    global Lp
+    gid = str(ctx.guild.id)
 
-    for member in liste_charm:
-        Lp[dicomembers[member]][7] = 'Charmé'
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
+
+    Lp = gdata[aid]["Lp"]
+
+    for memberid in liste_charm:
+        gdata[aid]["Lp"][str(memberid)][4] = 'Charmé'
         await channels[4].set_permissions(member, overwrite=can_see)
         await member.send("Tu as été charmé par le Joueur de flûte.")
         await ctx.channel.send("{} a été charmé".format(str(member)))
 
     await ctx.delete()
+    with open('games.json', 'w') as jf:
+        json.dump(gdata, jf, indent=4)
     await menu(ctx)
 
 
+async def kill_action(ctx, killedid, step):
 
-# ==========================================================================================================================================================
+    gid = str(ctx.guild.id)
 
+    with open('guilds.json') as f:
+        data = json.load(f)
 
-async def kill_panel(ctx):
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
 
-    global cr_commands
+    with open('games.json') as gf:
+        gdata = json.load(gf)
 
-    cr_commands.append("[{}] Action Kill exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
+    Lp = gdata[aid]["Lp"]
+    ancien_dead = gdata[aid]["ancien_dead"]
+    is_enfant = gdata[aid]["is_enfant"]
+    check_couple = gdata[aid]["check_couple"]
 
-    embed_panel = discord.Embed(
-        colour = discord.Color.from_rgb(60,60,60)
-    )
-
-    embed_panel.set_author(
-        name = "Panel de choix commande kill",
-        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-    )
-
-    embed_panel.add_field(
-        name ='Les emojis des joueurs sont rappelés chaque nuit.', 
-        value = "Réagissez à un émoji joueur pour **désigner le joueur qui va mourir**. \n \nRéagissez à l'emoji ✅ pour **confirmer votre choix**. \n \nRéagissez à l'émoji ❌ pour **annuler la commande**.", 
-        inline = False
-    )
-
-    current_panel = await ctx.channel.send(embed=embed_panel)
-
-    for name in dicop_name_to_emoji:
-        await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("❌")
-
-    def checkKill(reaction, user):
-        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
-
-    try:
-        reaction, user = await client.wait_for("reaction_add", check=checkKill, timeout=30.0)
-    except asyncio.TimeoutError:
-        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
-        await current_panel.delete()
-        await menu(ctx)
-    else:
-        if str(reaction.emoji) == non:
-            await ctx.channel.send("Commande annulée")
-            await reaction.message.delete()
-            await menu(ctx)
-        else:
-            await kill_action(ctx, dicop_emoji[reaction.emoji][0], 'Kill')
-
-async def kill_action(ctx, killed_name, step):
-
-    global Lp, is_enfant, check_couple, ancien_dead, dicop_emoji, dicop_id_to_emoji, dicop_name_to_emoji
-
-    author = mdj
     channel = mdj.voice.channel
     members = channel.members
 
     members = [k for k in members if str(k) != str(author)]
 
-    affiche = False
+    killed_name = client.get_user(int(killedid))
 
-    pla = Lp[dicomembers[killed_name]]
+    pla = Lp[killedid]
     rolep = pla[1]
-    status_couple = pla[4]
-    status_maitre = pla[5]
-    status_infect = pla[9]
-    status_impost = pla[10]
+    status_couple = pla[2]
+    status_maitre = pla[3]
+    status_infect = pla[6]
+    status_impost = pla[8]
 
     member = killed_name
     
     if rolep == 'Ancien' and ancien_dead == False:
-        ancien_dead = True
+        gdata[aid]["ancien_dead"] = True
         await ctx.channel.send("L'ancien a été tué une fois. Entrez cette commande à nouveau pour définitivement le tuer.")
 
     else:
@@ -2367,7 +2348,7 @@ async def kill_action(ctx, killed_name, step):
         if status_couple == 'Oui':
             await ctx.channel.send("N'oubliez pas de tuer l'autre amant si ce n'est pas déjà fait !")  
             await channels[6].set_permissions(member, overwrite=cant_talk)  
-            check_couple = False
+            gdata[aid]["check_couple"] = False
 
         if status_infect == 'Infecté':
             await channels[8].set_permissions(member, overwrite=cant_talk)
@@ -2379,13 +2360,12 @@ async def kill_action(ctx, killed_name, step):
 
         if status_maitre == 'Maitre' and is_enfant == False:
             print("OK Maitre")
-            is_enfant = True
+            gdata[aid]["is_enfant"] = True
             for memberenf in members:
-                pla_en = Lp[dicomembers[memberenf]]
+                pla_en = Lp[str(memberenf.id)]
                 status_enfant = pla_en[5]
                 print(memberenf, pla_en)
                 if status_enfant == 'Enfant':
-                    pla_en[6] = 'LG'
                     await channels[8].set_permissions(memberenf, overwrite=can_talk)
                     await channels[26].set_permissions(memberenf, overwrite=cant_talk)
                     await ctx.channel.send("{} est maintenant un LG".format(memberenf))
@@ -2428,205 +2408,110 @@ async def kill_action(ctx, killed_name, step):
         except: 
             pass
 
-        pla[1] = 'Mort'
-        del dicop_emoji[dicop_name_to_emoji[member]]
-        del dicop_name_to_emoji[member]
-        del dicop_id_to_emoji[member.id]
-        del dicomembers[member]
+        gdata[aid]["Lp"][str(member.id)][1] = 'Mort'
+        del gdata[aid]["dictemoji"][dicop_id_to_emoji[str(member.id)]]
+        del gdata[aid]["idtoemoji"][str(member.id)]
+        del gdata[aid]["dicomembers"][str(member.id)]
         
 
         print('OK {} est mort, il était {}'.format(str(member), rolep))
 
         if is_compo == True:
-            for i in range(0,len(Lroles_dispo)):
-                print(i,Lroles_dispo[i], rolep)
-                if Lroles_dispo[i] == rolep:
-                    Lroles_dispo.pop(i)
-                    affiche = True
-                    break
             
-            await channels[1].purge(limit=50)
+            gdata[aid]["Lroles"] = [k for k in Lroles_dispo if str(k) != str(rolep)]
+
+            await channels[1].purge(limit=50)          
             
-            if affiche == True:
-                
-                embedaf = discord.Embed(
-                    colour = discord.Color.grey(),
-                    title = "Informations partie"
-                )
+            embedaf = discord.Embed(
+                colour = discord.Color.default(),
+                title = "Informations partie"
+            )
 
-                Lroles_final = list(dict.fromkeys(Lroles_dispo))
-                Laff = ["``{}`` ({}) \n".format(trad_roles[k], Lroles_dispo.count(k)) if k in trad_roles else "``{}`` ({}) \n".format(k, Lroles_dispo.count(k)) for k in Lroles_final]
+            Lroles_final = list(dict.fromkeys(Lroles_dispo))
+            Laff = ["``{}`` ({}) \n".format(trad_roles[k], Lroles_dispo.count(k)) if k in trad_roles else "``{}`` ({}) \n".format(k, Lroles_dispo.count(k)) for k in Lroles_final]
 
+            if check_couple == True:
+                await Laff.append("\n _+ couple_")
+            
+            embedaf.add_field(
+                name = "Liste des rôles:",
+                value = ''.join(Laff),
+                inline = False
+            )
 
-                if check_couple == True:
-                    await Laff.append("\n _+ couple_")
-                
+            embedaf.set_author(
+                name = "LG Bot",
+                icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
+            )
 
-                embedaf.add_field(
-                    name = "Liste des rôles:",
-                    value = ''.join(Laff),
-                    inline = False
-                )
-
-                embedaf.set_author(
-                    name = "LG Bot",
-                    icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-                )
-
-                await channels[1].send(embed=embedaf)
+            await channels[1].send(embed=embedaf)
     
         else:
-            Lroles_dispo = [k for k in Lroles_dispo if str(k) != str(rolep)]
+            gdata[aid]["Lroles"] = [k for k in Lroles_dispo if str(k) != str(rolep)]
 
     await ctx.delete()
+
+    with open('games.json', 'w') as jf:
+        json.dump(gdata, jf, indent=4)
 
     await menu(ctx)
 
 
-# ==========================================================================================================================================================
+async def noctambule_action(ctx, victimeid, noctambuleid):
 
+    gid = str(ctx.guild.id)
 
-async def noctambule_panel(ctx):
+    with open('guilds.json') as f:
+        data = json.load(f)
 
-    global cr_commands
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
 
-    cr_commands.append("[{}] Action Noctambule exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
+    with open('games.json') as gf:
+        gdata = json.load(gf)
 
-    embed_panel = discord.Embed(
-        colour = discord.Color.from_rgb(0,0,100)
-    )
+    Lp = gdata[aid]['Lp']
+    is_enfant = gdata[aid]["is_enfant"]
 
-    embed_panel.set_author(
-        name = "Panel de choix commande noctambule",
-        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-    )
-
-    embed_panel.add_field(
-        name ='Les emojis des joueurs sont rappelés chaque nuit.', 
-        value = "Réagissez à un émoji joueur pour **désigner le joueur visé par le Noctambule**. \n \n Réagissez à l'emoji ✅ pour **confirmer votre choix**. \n \n Réagissez à l'émoji ❌ pour **annuler la commande**.", 
-        inline = False
-    )
-    
-    current_panel = await ctx.channel.send(embed=embed_panel)
-
-    for name in dicop_name_to_emoji:
-        fiche_player = Lp[dicomembers[name]]
-        if str(fiche_player[1]) == 'Noctambule' or fiche_player[11] == 'Noctambule' or fiche_player[12] == 'Noctambule':
-            n_noctambule = name
-        else:
-            await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("❌")
-
-    def checkNoct(reaction, user):
-        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
-
-    try:
-        reaction, user = await client.wait_for("reaction_add", check=checkNoct, timeout=30.0)
-    except asyncio.TimeoutError:
-        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
-        await current_panel.delete()
-        await menu(ctx)
-    else:
-        if str(reaction.emoji) == non:
-            await ctx.channel.send("Commande annulée")
-            await reaction.message.delete()
-            await menu(ctx)
-        else:
-            await noctambule_action(ctx, dicop_emoji[reaction.emoji][0], n_noctambule)
-
-
-async def noctambule_action(ctx, victime_name, noctambule_name):
-
-    global Lp
-
-    fiche_victime = Lp[dicomembers[victime_name]]
-    rolevi = fiche_victime[1]
-    status_couple = fiche_victime[4]
-    status_maitre = fiche_victime[5]
-    status_infect = fiche_victime[9]
-    status_impost = fiche_victime[10]
+    victime_name = client.get_user(int(victimeid))
+    noctambule_name = client.get_user(int(noctambuleid))
 
     member = victime_name
 
-    print("{} couple: {}".format(str(member),status_couple))
-    print("{} enfant/maitre: {}".format(str(member),status_maitre))
+    print("{} couple: {}".format(str(member),Lp[victimeid][4]))
+    print("{} enfant/maitre: {}".format(str(member),Lp[victimeid][5]))
     
-    if rolevi in dicoroles:
-        await channels[dicoroles[rolevi]].set_permissions(member, overwrite=cant_talk)
+    if Lp[victimeid][1] in dicoroles:
+        await channels[dicoroles[Lp[victimeid][1]]].set_permissions(member, overwrite=cant_talk)
         print('OK dicoroles')
-    if rolevi == "IPDL" or rolevi == 'LGB' or (rolevi == 'Enfant' and is_enfant == True) or status_infect == 'Infecté' or status_impost == 'LG':
+    if Lp[victimeid][1] == "IPDL" or Lp[victimeid][1] == 'LGB' or (Lp[victimeid][1] == 'Enfant' and is_enfant == True) or Lp[victimeid][6] == 'Infecté' or Lp[victimeid][8] == 'LG':
         await channels[8].set_permissions(member, overwrite=cant_talk)
         print('OK LG')
 
     await victime_name.send("Vous avez été victime du Noctambule **({})**. Vous ne pouvez pas utiliser votre pouvoir cette nuit.".format(noctambule_name))
-    await ctx.channel.send("**{}** (rôle: __{}__) a été victime du Noctambule (*{}*)".format(victime_name, rolevi, noctambule_name))
+    await ctx.channel.send("**{}** (rôle: __{}__) a été victime du Noctambule (*{}*)".format(victime_name, Lp[victimeid][1], noctambule_name))
     await ctx.delete()
+
+    with open('games.json', 'w') as jf:
+        json.dump(gdata, jf, indent=4)
 
     await menu(ctx)
 
 
-# ==========================================================================================================================================================
-
-
-async def servante_panel(ctx):
-
-    global cr_commands
-
-    cr_commands.append("[{}] Action Servante exécutée par {} \n \n".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
-
-    embed_panel = discord.Embed(
-        colour = discord.Color.from_rgb(255,200,255)
-    )
-
-    embed_panel.set_author(
-        name = "Panel de choix commande servante",
-        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-    )
-
-    embed_panel.add_field(
-        name ='Les emojis des joueurs sont rappelés chaque nuit.', 
-        value = "Réagissez à un émoji joueur pour **désigner le joueur visé par la Servante**. \n \n Réagissez à l'emoji ✅ pour **confirmer votre choix**. \n \n Réagissez à l'émoji ❌ pour **annuler la commande**.", 
-        inline = False
-    )
-
-    current_panel = await ctx.channel.send(embed=embed_panel)
-
-    for name in dicop_name_to_emoji:
-        fiche_player = Lp[dicomembers[name]]
-        if str(fiche_player[1]) == 'Servante' or fiche_player[11] == 'Servante' or fiche_player[12] == 'Servante':
-            n_servante = name
-        else:
-            await current_panel.add_reaction(dicop_name_to_emoji[name])
-    await current_panel.add_reaction("❌")
-
-    def checkServ(reaction, user):
-        return (user == mdj) and ((str(reaction.emoji) in dicop_emoji) or str(reaction.emoji) == non) and (reaction.message.id == current_panel.id)
-
-    try:
-        reaction, user = await client.wait_for("reaction_add", check=checkServ, timeout=30.0)
-    except asyncio.TimeoutError:
-        await ctx.channel.send("Vous avez mis trop de temps à répondre, commande annulée.")
-        await current_panel.delete()
-        await menu(ctx)
-    else:
-        if str(reaction.emoji) == non:
-            await ctx.channel.send("Commande annulée.")
-            await reaction.message.delete()
-            await menu(ctx)
-        else:
-            await voleur_action(ctx, dicop_emoji[reaction.emoji][0], n_servante, 'Servante')
-            await kill_action(ctx, dicop_emoji[reaction.emoji][0], 'Servante')
-
-
-# ==========================================================================================================================================================
-
-
 async def vote_panel(ctx):
 
-    author = mdj
-    channel = author.voice.channel
-    members = [member for member in channel.members if member is not author and str(Lp[dicomembers[member]][1]) != 'Mort']
+    gid = str(ctx.guild.id)
 
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
+
+    channel = author.voice.channel
+    members = [member for member in channel.members if member is not author and str(Lp[str(member.id)][1]) != 'Mort']
 
     for member in members:
         try:
@@ -2659,13 +2544,16 @@ async def vote_panel(ctx):
     # A finir
 
 
-# ==========================================================================================================================================================
-
-
 async def mute(ctx, state):
 
     try:
-        author = mdj
+        gid = str(ctx.guild.id)
+
+        with open('guilds.json') as f:
+            data = json.load(f)
+
+        aid = str(data[gid]["mdj"])
+        mdj = client.get_user(data[gid]["mdj"])
 
         channel = author.voice.channel
         members = channel.members
@@ -2684,25 +2572,25 @@ async def mute(ctx, state):
         pass
 
 
-# ==========================================================================================================================================================
-
-
 @client.command()
 @commands.has_any_role("Maître du Jeu","Développeur","Admin","Host")
 async def purge(ctx, limit):
     await ctx.channel.purge(limit=int(limit))
 
 
-
-# ==========================================================================================================================================================
-
-
-
 @client.command()
 @commands.has_any_role("Maître du Jeu")
 async def crypt(ctx, pourcentage):
 
-    global valuepf
+    gid = str(ctx.guild.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
+    valuepf = data[gid]["valuepf"]
 
     embed = discord.Embed(
         colour = discord.Color.red(),
@@ -2727,13 +2615,8 @@ async def crypt(ctx, pourcentage):
         await ctx.send(embed=embed)
 
     else:
-        valuepf = int(pourcentage)
+        data[gid]["valuepf"] = int(pourcentage)
         await ctx.channel.send("Pourcentage de changer une lettre pour la PF, le Chaman, le 3e Oeil et le Jaloux: **{}%**.".format(valuepf))
-
-
-
-
-# ==========================================================================================================================================================
 
 
 @client.event
@@ -2741,24 +2624,25 @@ async def on_command_error(ctx, error):
 
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.channel.send("<@{.id}> Erreur: il manque un argument à la commande. Faites .help pour vérifier les arguments de cette commande.".format(ctx.author))
-    
-    elif isinstance(error, commands.CommandNotFound):
-        await ctx.channel.send("<@{.id}> Erreur: la commande entrée n'a pas été trouvée. Faites .help pour accéder à la liste des commandes.".format(ctx.author))
-
-
-# ==========================================================================================================================================================
 
 
 @client.command()
 @commands.has_any_role("Maître du Jeu")
 async def freset(ctx):
 # Reset de force
-    await reset(ctx)
+    await reset(ctx, ctx.author)
 
 
-# ==========================================================================================================================================================
+async def reset_panel(ctx, auth):
 
-async def reset_panel(ctx):
+    gid = str(ctx.guild.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
 
     embed = discord.Embed(
         colour = discord.Color.from_rgb(85,0,25),
@@ -2799,16 +2683,25 @@ async def reset_panel(ctx):
         else:
             await reset(ctx)
 
-# ==========================================================================================================================================================
-
 
 async def reset(ctx):
 #Commande d'arrêt du jeu
 
-    global can_vote, Lroles_dispo, Lp, channels, dicomembers, dicop_id_to_emoji, dicop_name_to_emoji, dicop_emoji, is_compo, is_channels, in_game, game_started, day, is_enfant, ancien_dead, check_couple, valuepf, cpt_jour, mdj, cr_commands, cr_chat, cr_actions
+    gid = str(ctx.guild.id)
+
+    with open('guilds.json') as f:
+        data = json.load(f)
+
+    channels = [client.get_channel(k) for k in data[gid]["channels"]]
+    aid = str(data[gid]["mdj"])
+    mdj = client.get_user(data[gid]["mdj"])
+    in_game = gdata[aid]["in_game"]
+
+    with open('games.json') as gf:
+        gdata = json.load(gf)
 
     try:
-        author = mdj
+        author = auth
         channel = author.voice.channel
         members = channel.members
     except:
@@ -2821,52 +2714,18 @@ async def reset(ctx):
             await channels[3].set_permissions(member, overwrite=cant_talk)
             print("OK, {}".format(member))
 
+        data[gid]["in_game"] = False
+        data[gid]["mdj"] = None
 
-        await ctx.channel.send("Enregistrement des Logs en cours... ⚙️")
+        with open('guilds.json', 'w') as f:
+            json.dump(data, f, indent=4)
 
-
-        cr_commands.append("[{}] Reset enclenché, fin de la partie. \n".format(datetime.now().strftime("%H:%M:%S")))
-        cr_commands.append("[{}] Enregistrement des logs de commandes terminé.".format(datetime.now().strftime("%H:%M:%S")))
-
-        cr_chat.append("[{}] Reset enclenché, fin de la partie. \n".format(datetime.now().strftime("%H:%M:%S")))
-        cr_chat.append("[{}] Enregistrement des logs de chats terminé.".format(datetime.now().strftime("%H:%M:%S")))
-
-        cr_actions.append("[{}] Reset enclenché, fin de la partie. \n".format(datetime.now().strftime("%H:%M:%S")))
-        cr_actions.append("[{}] Enregistrement des actions de la partie terminé.".format(datetime.now().strftime("%H:%M:%S")))
-
-
-        recap_commands = open("Logs/{}/commandes.txt".format(file_token), "w") 
-        for txt in cr_commands:
-            recap_commands.write(txt) 
-        recap_commands.close()
-        await ctx.channel.send("Enregistrement des **Logs des commandes** terminé ✅") 
-
-
-        recap_chat = open("Logs/{}/messages.txt".format(file_token), "w") 
-        for txt in cr_chat:
-            try:
-                recap_chat.write(txt)
-            except:
-                recap_chat.write("[{}] Erreur dans la retranscription d'un message \n \n".format(datetime.now().strftime("%H:%M:%S"))) 
-        recap_chat.close()
-        await ctx.channel.send("Enregistrement des **Logs des messages** terminé ✅") 
-
-
-        recap_actions = open("Logs/{}/actions.txt".format(file_token), "w") 
-        for txt in cr_actions:
-            recap_actions.write(txt)
-        recap_actions.close()
-        await ctx.channel.send("Enregistrement des **Logs des actions** terminé ✅") 
-
-
-        await ctx.channel.send("**Enregistrement terminé** ✅")
-
-        initialize()
-        #os.system('py {}/csts.py'.format(os.getcwd()))
+        gdata.update({aid:{"guild":ctx.guild.id,"Lp": [], "Lroles": [], "dicomembers": {},"idtoemoji": {},"dictemoji": {},"is_compo": is_compo,"game_started": False,"day": False,"is_enfant": False,"ancien_dead": False,"check_couple": False,"cpt_jour": 0,"can_vote": False}})
+                    
+        with open('games.json', 'w') as f:
+            json.dump(gdata, f, indent = 4)
 
         await ctx.channel.send("La partie est arrêtée")
-        await ctx.channel.send("<@{}> Token de la partie: {}".format(157588494460518400, file_token))
-
 
     else:
         await ctx.channel.send("Aucune partie n'est en cours: simple reset des permissions")

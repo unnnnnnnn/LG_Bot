@@ -2570,7 +2570,6 @@ async def crypt(ctx, pourcentage):
     channels = [client.get_channel(k) for k in data[gid]["channels"]]
     aid = str(data[gid]["mdj"])
     mdj = client.get_user(data[gid]["mdj"])
-    valuepf = data[gid]["valuepf"]
 
     embed = discord.Embed(
         colour = discord.Color.red(),
@@ -2596,7 +2595,10 @@ async def crypt(ctx, pourcentage):
 
     else:
         data[gid]["valuepf"] = int(pourcentage)
-        await ctx.channel.send("Pourcentage de changer une lettre pour la PF, le Chaman, le 3e Oeil et le Jaloux: **{}%**.".format(valuepf))
+        await ctx.channel.send("Pourcentage de changer une lettre pour la PF, le Chaman, le 3e Oeil et le Jaloux: **{}%**.".format(data[gid]["valuepf"]))
+        
+        with open("guilds.json", 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False )
 
 
 @client.event

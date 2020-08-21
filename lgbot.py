@@ -217,6 +217,12 @@ async def on_message(ctx):
 
     await client.process_commands(ctx)
 
+@client.event
+async def on_command_error(ctx, error):
+
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.channel.send("<@{.id}> Erreur: il manque un argument à la commande. Faites .help pour vérifier les arguments de cette commande.".format(ctx.author))
+
 
 @client.command()
 async def help(ctx):
@@ -1209,8 +1215,8 @@ async def start(ctx, state_couple):
             if str(member) != str(author):
 
                 print(Lroles_game)
-                irole = rdm.choice(Lroles_game)
-                Lroles_game.remove(role)
+                role_given = rdm.choice(Lroles_game)
+                Lroles_game.remove(role_given)
 
                 
                 if role_given in trad_roles:
@@ -1422,7 +1428,7 @@ async def start(ctx, state_couple):
         with open('games.json', 'w', encoding='utf-8') as f:
             json.dump(gdata, f, indent=4, ensure_ascii=False)
 
-        await menu(ctx, ctx.author)
+        await menu(ctx)
 
     
     else:
@@ -1454,6 +1460,8 @@ async def fmenu(ctx):
 
 async def menu(ctx):
 
+    print("ok")
+
     gid = str(ctx.guild.id)
 
     with open('guilds.json', encoding='utf-8') as f:
@@ -1466,10 +1474,13 @@ async def menu(ctx):
 
     game_started = gdata[aid]["game_started"]
     day = gdata[aid]["day"]
+    Lroles_dispo = gdata[aid]["Lroles"]
 
     panel = discord.Embed(
             colour = discord.Color.green()
         ) 
+    
+    print("ok")
 
     emojis_action = ["🐺", "🔪", "👒", "🔇", "🔊", "🌙", "🧒", "❤️", "💤", "🕵️", "🎺", "🌞","🛑","📔"]
 
@@ -1478,6 +1489,8 @@ async def menu(ctx):
         await ctx.channel.send("La partie n'a pas encore commencé. Le menu n'est pas encore disponible.")
 
     else:
+
+        print("ok")
 
         if day == True:
             panel.set_author(
@@ -2596,16 +2609,120 @@ async def crypt(ctx, pourcentage):
     else:
         data[gid]["valuepf"] = int(pourcentage)
         await ctx.channel.send("Pourcentage de changer une lettre pour la PF, le Chaman, le 3e Oeil et le Jaloux: **{}%**.".format(data[gid]["valuepf"]))
-        
+
         with open("guilds.json", 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False )
 
 
-@client.event
-async def on_command_error(ctx, error):
+@client.command()
+async def breport(ctx, *, bug):
 
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.channel.send("<@{.id}> Erreur: il manque un argument à la commande. Faites .help pour vérifier les arguments de cette commande.".format(ctx.author))
+    with open("blocklist.json", encoding='utf-8') as f:
+            data = json.load(f)
+
+    if str(ctx.author.id) in data:
+        await ctx.author.send("❌ Vous êtes banni, vous n'êtes plus autorisé à envoyer des reports de bugs.")
+    
+    else:
+    
+        embed = discord.Embed(
+            title = "Bug report",
+            colour = discord.Color.from_rgb(0,0,100)
+        )
+
+        embed.set_author(
+            name = str(ctx.author),
+            icon_url = ctx.author.avatar_url
+        )
+
+        embed.add_field(
+            name = "🔎 {} ({}) a reporté le bug suivant :".format(ctx.author, ctx.author.id),
+            value = "```{}```".format(bug, non),
+            inline = False
+        )
+
+        await client.get_channel(746291001043320834).send(embed=embed)
+        await ctx.channel.send("Votre report a été envoyé")
+
+
+@client.command()
+@commands.has_any_role("Maître du Jeu")
+async def rban(ctx, idb, *, reason = None):
+
+    if ctx.author.id == 157588494460518400:
+
+        with open("blocklist.json", encoding='utf-8') as f:
+            data = json.load(f)
+
+        if idb in data:
+            await ctx.channel.send("❌ Cet utilisateur ({}) est déjà banni.".format(idb))
+
+        else:
+            data.update({idb:{"name": str(client.get_user(int(idb))), "reason": reason}})
+
+            with open("blocklist.json", 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+
+            await ctx.channel.send("🔨 {} a été banni, il ne peut plus envoyer des reports de bugs. \nRaison: ``{}``".format(client.get_user(int(idb)), reason))
+            
+            embed = discord.Embed(
+                title = "Vous avez été banni",
+                colour = discord.Color.default()
+            )
+        
+            embed.set_footer(
+                text = str(client.get_user(int(idb))),
+                icon_url = client.get_user(int(idb)).avatar_url
+            )
+
+            embed.add_field(
+                name = "❗ Vous avez maintenant l'interdiction d'envoyer des reports de bugs. Raison:",
+                value = "```{}```".format(reason),
+                inline = False
+            )
+            embed.set_author(
+                name = str(ctx.author),
+                icon_url = ctx.author.avatar_url
+            )
+
+            await client.get_user(int(idb)).send(embed=embed)
+
+
+
+@client.command()
+@commands.has_any_role("Maître du Jeu")
+async def unban(ctx, idb):       
+
+    if ctx.author.id == 157588494460518400:
+
+        with open("blocklist.json", encoding='utf-8') as f:
+            data = json.load(f)
+
+        if idb in data:
+            data.pop(idb, None)
+
+            with open("blocklist.json", 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+            
+            await ctx.channel.send("✅ Cet utilisateur ({}) a été débanni".format(idb))
+
+        else:
+            await ctx.channel.send("❌ Cet utilisateur ({}) n'est pas dans la liste des bannis".format(idb))
+
+@client.command()
+@commands.has_any_role("Maître du Jeu")
+async def banlist(ctx):       
+
+    if ctx.author.id == 157588494460518400:
+
+        with open("blocklist.json", encoding='utf-8') as f:
+            data = json.load(f)
+        
+        for elm in data:
+        Lb = ["**{}** *({})* \nRaison: ``{}``\n \n".format(data[elm]["name"], elm, data[elm]["reason"]) for elm in data]
+
+        await ctx.channel.send(''.join(Lb))
+            
 
 
 @client.command()

@@ -1,0 +1,23 @@
+{
+    "157588494460518400": {
+        "guild": 484797117139910656,
+        "Lp": {},
+        "Lroles": [
+            "Werewolf",
+            "AW",
+            "Oracle",
+            "Witch",
+            "Bear"
+        ],
+        "idtoemoji": {},
+        "dictemoji": {},
+        "is_compo": true,
+        "game_started": false,
+        "day": true,
+        "is_enfant": false,
+        "ancien_dead": false,
+        "check_couple": false,
+        "cpt_jour": 0,
+        "can_vote": false
+    }
+}

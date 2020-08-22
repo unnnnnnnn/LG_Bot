@@ -1,4 +1,4 @@
-dicoroles = {
+dicoroles_fr = {
     'Confesseur': 5,
     'Cupidon': 6,
     'Salvateur': 7,
@@ -28,7 +28,37 @@ dicoroles = {
     'Devin': 29
 }
 
-trad_roles = {
+dicoroles_en = {
+    'Confessor': 5,
+    'Cupid': 6,
+    'Guard': 7,
+    'Werewolf': 8,
+    'BBW': 8,
+    'AW': 8,
+    'Girl': 9,
+    'WF': 10,
+    'WW': 11,
+    'Oracle': 12,
+    'Witch': 13,
+    'Fox': 14,
+    'Crow': 15,
+    'PP': 16,
+    'Thief': 17,
+    'Sister': 18,
+    'Brother': 19,
+    'Shaman': 20,
+    'Jealous': 21,
+    'Owl': 22,
+    'Eye': 23,
+    'Traitor': 24,
+    'Impostor': 25,
+    'Child': 26,
+    'Dictator': 27,
+    'Assassin': 28,
+    'Diviner': 29
+}
+
+trad_roles_fr = {
     'LG': 'Loup-Garou',
     'LGA': 'Loup-Garou Anonyme',
     'LGB': 'Loup-Garou Blanc',
@@ -52,8 +82,24 @@ trad_roles = {
     'Servante': 'Servante Dévouée',
     'Devin': 'Devin Maléfique'
 }
+trad_roles_en = {
+    'Girl': 'Little Girl',
+    'Bear': 'Bear Tamer',
+    'AW': 'Anonymous Wolf',
+    'WF': 'Wolf Father',
+    'WW': 'White Wolf',
+    'PP': "Pied Piper",
+    'Child': "Wild Child",
+    'Sectarian': "Abominable Sectarian",
+    'RRH': "Red Riding Hood",
+    'Owl': 'Night Owl',
+    'Eye': '3rd Eye',
+    'Servant': 'Devoted Servant',
+    'Knight': 'Knight with a Rusty Sword',
+    'Diviner': 'Evil Diviner'
+}
 
-desc_roles = {
+desc_roles_fr = {
     'Voyante': "(VILLAGE) Chaque nuit, le joueur pourra sonder quelqu'un dans la partie pour connaître son rôle. Si la voyante est bavarde, le rôle sera dit publiquement (mais pas le pseudo).",
     'Sorcière': "(VILLAGE) Ce joueur détient deux potions utilisables la nuit, après l'attaque des loups-garous: une de vie, permettant de soigner la personne attaquée par les loups-garous la même nuit et une de mort, permettant de tuer quelqu'un sans qu'il ne puisse être sauvé. Si un membre du couple est touché, alors son confident se suicidera également.",
     'PF': "(VILLAGE) Ce joueur pourra voir la discussion des loups-garous chaque nuit de manière cryptée, mais ne verra pas leurs pseudos.",
@@ -96,8 +142,52 @@ desc_roles = {
     'Assassin': "(SOLO) Chaque nuit, s'il le veut, il peut tuer un autre villageois au choix. Son but est d'être le dernier survivant. Précisions: il ne peut PAS être tué par les Loups, et sa victime ne peut PAS être sauvée par la Sorcière, MAIS peut être sauvée par le Salvateur.",
     'Devin': "(SOLO) Chaque nuit il recevra le nom d'un joueur. Si il devine le rôle de cette personne, il peut tuer une personne de la même manière que l'Assassin. Sinon son fonctionnement est le même que l'Assassin."
 }
+desc_roles_en = {
+    'Oracle': "(VILLAGE) Each night the player will discover the role of someone they choose. If the Oracle is 'talkative', the role will be announced publicly.",
+    'Witch': "(VILLAGE) The Witch has two potions that can be used after Werewolves' attack. One is to save the life of the one attacked by the Wolves, and the other is to kill someone. Both potions can only be used once per game.",
+    'Girl': "(VILLAGE) The Little Girl can see every messages in the Werewolves channel, but crypted. The player won't see their names.",
+    'Fox': "(VILLAGE) Each night, the Fox will have the possibility to smell a player. If this player, or one of the two adjacent players is a Wolf, the Fox will be told that one of them is a Wolf. If none of them is, the Fox won't be able to use this power again.",
+    'Sister': "(VILLAGE) Sisters have a dedicated channel when they can talk together whenever they want. There can only be TWO Sisters in the game.",
+    'Brother': "(VILLAGE) Brothers have a dedicated channel when they can talk together whenever they want. There can only be THREE Brothers in the game.",
+    'Guard': "Each night before the Wolves' attack, the Guard will choose someone to protect against this attack. A Guard can't be used on the same player 2 times in a row, but he can protect himself. This power also protect from dying to the Assassin or the Evil Diviner.",
+    'Werewolf': "(WOLVES) Werewolves have a dedicated channel where they can only speak at night, and where each night they have to kill someone.",
+    'WF': "(WOLVES) One time per game, after the Wolves have killed someone, the Father can choose to infect this player. The next night, this player will turn into a Werewolf, but will keep his original power if he has any.",
+    'WW': "(SOLO) The White Wolf can kill another Wolf every two nights. He plays with the other Wolves but has to win alone.",
+    'Cupid': "(OTHERS) At the beginning of the game, the Cupid will choose 2 players that will be Lovers until the end. Those 3 players will have to win together, and will have access to a channel where they can only talk during the day. The Cupid can choose himself as a Lover. If both of the Lovers die, the Cupid has to win with the Village.",
+    'PP': "(SOLO) Each night, the Pied Pipier can charm up to two players. His goal is to charm every players in the game. If he charms them all, he wins. Being charmed gives access to a channel where you can see the other charmed players.",
+    'Child': "(OTHERS) At the beginning of the game, the Wild Child will choose a master. If this master die, the Child will become a Werewolf and will win with them. Before the Child is transformed, he has to win with the Village.",
+    'Thief': "(OTHERS) At the end of each night, the current Thief will steal the role of someone else. They will then 'trade' their roles.",
+    'Ancient': "(VILLAGE) The Ancient can survive to one attack from the Wolves. If the Ancient dies to the vote of the village, every player who influenced his death will lose their power.",
+    'BBW': "(WOLVES) As long as no Wolf is dead (Werewolf, Anonymous Wolf, Wolf Father, White Wolf), the Big Bad Wolf can kill one more player each night.",
+    'AW': "(WOLVES) Each night, a role will be announced in the Wolves channel. This role will be the cover of the Anonymous Wolf. If he is the target of the Orcale, the Bear Tamer or the Fox, they will see the cover role instead of 'Anonymous Wolf'. This cover role can be any role in the game (only alive players), and it includes all the Wolf roles.",
+    'Bear': "(VILLAGE) Each day, if there is a Wolf among the 2 adjacent players of the Bear Tamer, the Game Master will explicitly and publicly say: 'The bears grumbled this night' without revealing the Bear Tamer's identidy.",
+    'Angel': "(SOLO) The Angel's goal is to die on the first day by the village's vote. If he succeeds, he wins the game. If he does not, he has to win the the village.",
+    'Knight': "(VILLAGE) If the Knight dies from the Wolves, the nearest Wolf will die the next day.",
+    'Shaman': "(VILLAGE) The Shaman can see every message in the 'Deads' channel, but crypted and without knowing who is writing.",
+    'Crow': "(VILLAGE) Each night, if he wants, the Crow can put 2 votes by default on someone for the next vote.",
+    'Scapegoat': "(VILLAGE) If there is a tie during the vote, the Scapegoat will instantly die. He will then choose up to 3 players that won't be able to use their power for 2 days.",
+    'Idiot': "(VILLAGE) If the Idiot dies to the vote, he won't die but will lose his right to vote, and his role will be revealed.",
+    'Villager': "(VILLAGE) The Villager doesn't have any power. He can vote everyday.",
+    'Hunter': "(VILLAGE) When the Hunter dies, he can choose a player that will also die with him. He can choose to not kill anyone.",
+    'Sectarian': "(SOLO) At the beginning of the game, the Sectarian will recieve a list composed of half of the players in the game. If all of these players die, the Sectarian win.",
+    'Juge': "(VILLAGE) Once per game, the Juge can decide to reroll a vote. The person voted during the first vote will still die, and another vote will take place.",
+    'Confessor': "(VILLAGE) Once per game, the Confessor can discover the role of someone. The targeted player will then know the identity of the Confessor.",
+    'Jealous': "(VILLAGE) The Jealous will see every messages in the Cupid's and Lovers' channel, but crypted and without seeing who is writing.",
+    'RRH': "(VILLAGE) As long as the Hunter is alive, the Red Riding Hood won't die from the Wolves' attacks.",
+    'Ankou': "(VILLAGE) After the Ankou's death, he can vote with the village for 2 days. He will tell his vote to the Game Master in private messages.",
+    'Dictator': "(VILLAGE) Once per game, he can choose to do a coup d'état which will cancel the next vote. If he doesn't vote for a Wolf, he dies the next day.",
+    'Owl': "(VILLAGE) Each night, the Night Owl can, if he wants, to greet a player. This player will then not be able to user his power for the entire night, but he will know the Night Owl's identity.",
+    'Reaper': "(VILLAGE) If the Reaper dies from the vote or from the Witch, the 2 adjacent players to him die aswell.",
+    'Eye': "(VILLAGE) During the first night and first day only, the 3rd Eye will have all the messages from every channels, but crypted. He will know from which channel the message comes from but he won't know who is writing. He will know the Child's master, the Anonymous Wolf's cover, and the role of the Impostor aswell.",
+    'Traitor': "(WOLVES) The Traitor has to win with the Wolves. At the beginning of the game, he will receive a VILLAGE role. He has to use this role. He doesn't know who the Wolves are, and the Wolves don't know who he is either.",
+    'Impostor': "(OTHERS) At the beginning of the game, he will choose a role among 2 roles from roles NON PRESENT in the game. He will have to use this role for the rest of the game. If he is targeted by the Oracle, Confessor etc. the role shown will be 'Impostor', as well as when he dies.",
+    'Servant': "(OTHERS) Once per game, when someone dies from the vote, the Servant can unveil herself and will take the role of the dead player. Nobody will know which role the dead player had as 'Devoted Servant' will be shown when he dies.",
+    'Assassin': "(SOLO) Each night, if he wants, the Assassin can kill someone. His goal is to be the last player alive. The Assassin can NOT be killed by the Wolves, and his victim can NOT be saved by the Witch, but the Guard CAN protect the victim.",
+    'Diviner': "(SOLO) Each night, the Diviner will receive the name of a player. If he guesses correctly the role of that person, he can kill someone. Otherwise, he works exactly like the Assassin (see Assassin description for more details)."
+}
 
-chans = {
+
+chans_fr = {
     0: 'commandes-bot',
     1: 'roles-de-la-game',
     2: 'place-du-village',
@@ -128,6 +218,38 @@ chans = {
     27: 'dictateur',
     28: 'assassin',
     29: 'devin'
+}
+chans_en = {
+    0: 'bot-commands',
+    1: 'game-roles',
+    2: 'village-square',
+    3: 'deads',
+    4: 'charmed',
+    5: 'confessor',            
+    6: 'cupid-and-lovers',
+    7: 'guard',
+    8: 'werewolves',
+    9: 'little-girl',
+    10: 'wolf-father',
+    11: 'white-wolf',
+    12: 'oracle',
+    13: 'witch',
+    14: 'fox',
+    15: 'crow',
+    16: 'pied-piper',
+    17: 'thief',
+    18: 'sisters',
+    19: 'brothers',
+    20: 'shaman',
+    21: 'jealous',
+    22: 'night-owl',
+    23: '3rd-eye',
+    24: 'traitor',
+    25: 'impostor',
+    26: 'wild-child',
+    27: 'dictator',
+    28: 'assassin',
+    29: 'diviner'
 }
 
 

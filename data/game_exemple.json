@@ -1,0 +1,18 @@
+{
+    "token": {
+        "Lp": [],
+        "Lroles_dispo": [],
+        "dicomembers": {},
+        "dicop_name_to_emoji": {},
+        "dicop_emoji": {},
+        "is_compo": false,
+        "game_started": false,
+        "day": false,
+        "is_enfant": false,
+        "ancien_dead": false,
+        "check_couple": false,
+        "cpt_jour": 0,
+        "can_vote": false,
+        "mdj": null
+    }
+}

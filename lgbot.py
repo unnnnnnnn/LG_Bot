@@ -25,11 +25,10 @@ client.remove_command("help")
 """
 TO-DO:
 
-Tester une game avec nouveau système
-Finir implémentation setting de langue
-Traduire ce qu'il reste
-Nouvelle protection sur utilisateur de commandes
-Faire une commande revive
+Test everything
+New permissions protection
+Fix bugs
+Do the damn README
 
 
 """

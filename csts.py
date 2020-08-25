@@ -28,7 +28,7 @@ LrVillage_fr = ['Villageois','Voyante','Chasseur','Ancien','Sorcière','PF','Bou
 LrVillage_en = ['Villager','Oracle','Hunter','Jealous','Ancient','Witch','Girl','Scapegoat','Idiot','Crow','Shaman','Fox','Bear','Sister','Brother','Knight','Guard','Juge','Confessor','RRH','Ankou','Dictator','Owl','Eye','Reaper']
 
 LrLG_fr = ['LG','LGA','IPDL','Traitre']
-LrLG_en = ["Werewolf", "AW", "WF", 'Traitor']
+LrLG_en = ['Werewolf', 'AW', 'WF', 'Traitor']
 
 LrSolo_fr = ['JDF','Sectaire','Assassin','Devin','LGB','Ange']
 LrSolo_en = ['PP', 'Sectarian', 'Assassin', 'Diviner', 'WW', 'Angel']
@@ -55,3 +55,5 @@ can_see.read_messages = True
 
 ok = "✅"
 non = "❌"
+left = "⬅️"
+right = "➡️"

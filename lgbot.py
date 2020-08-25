@@ -19,16 +19,16 @@ from datetime import datetime
 
 os.chdir(os.path.dirname(__file__))
 
+
 client = commands.Bot(command_prefix=".")
 client.remove_command("help")
 
 """
 TO-DO:
 
-Test everything
-New permissions protection
-Fix bugs
-Do the damn README
+Tester une game avec nouveau système
+(Fix les bugs)
+Finir le README
 
 
 """
@@ -51,9 +51,8 @@ async def on_ready():
         data = json.load(f)
 
     for idg in guildsIds:
-        print(idg)
         if idg not in data:
-            data.update({idg:{"channels":[], "in_game": False, "mdj": None, "valuepf": 25, "language": 'french'}})
+            data.update({idg:{"channels":[], "in_game": False, "mdj": None, "valuepf": 25, "language": 'english'}})
             await updates.send("⬆️ LG Bot a **rejoint** le serveur {} ({})".format(client.get_guild(int(idg)), idg))
 
     for ids in list(data):
@@ -77,13 +76,17 @@ async def on_guild_join(guild):
     with open('data/guilds.json', encoding='utf-8') as f: 
         data = json.load(f)
 
-    data.update({gid:{"channels":[], "in_game": False, "mdj": None, "valuepf": 25, "language": 'french'}})
+    data.update({gid:{"channels":[], "in_game": False, "mdj": None, "valuepf": 25, "language": 'english'}})
 
     with open('data/guilds.json', 'w', encoding='utf-8') as f: 
         json.dump(data, f, indent=4, ensure_ascii=False)
     
     await updates.send("⬆️ LG Bot a **rejoint** le serveur {} ({})".format(guild, gid))
 
+    try:
+        await guild.create_role(name="LG Host", colour=discord.Color.from_rgb(255,65,65))
+    except:
+        pass
 
 @client.event
 async def on_guild_remove(guild):
@@ -100,6 +103,33 @@ async def on_guild_remove(guild):
     with open('data/guilds.json', 'w', encoding='utf-8') as f: 
         json.dump(data, f, indent=4, ensure_ascii=False)
   
+
+@client.event
+async def on_guild_channel_create(channel):
+    
+    if channel.name == "lg-announcements":
+
+        embed = discord.Embed(
+            colour = discord.Color.from_rgb(100,10,10),
+            title = "Thanks for adding LG Bot to {}".format(channel.guild.name),
+            description = "From now on, updates and announcements will be sent in this channel."
+        )
+        embed.set_author(
+            name = "LG Bot",
+            icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
+        )
+        embed.add_field(
+            name = "📌 Useful links",
+            value = "[Invite the bot](https://www.google.fr/) - [Support server](https://www.google.fr/) - [French server](https://discord.gg/nuUpb7U)",
+            inline = False
+        )
+        embed.add_field(
+            name = "Bot Usage",
+            value = "To start using the bot, an admin needs to enter the `.setup` command. That will create all the channels needed to play the game. \n \nTo host a game you need to have the `LG Host` role that the bot creates when it joins a server. \n \nUse the `.lsetting` command to change the language of the bot (english by default). Available languages are **french** and **english**. \n \nUse the `.help` command to get more informations about the game and commands.",
+            inline = False
+        )
+
+        await channel.send(embed=embed)
 
 @client.event
 async def on_message(ctx):
@@ -296,6 +326,68 @@ async def on_command_error(ctx, error):
 
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.channel.send(ldata["errorMissingArg"].format(ctx.author))
+    
+    if isinstance(error, commands.MissingAnyRole):
+        await ctx.channel.send(ldata["errorPermissionMissing"])
+
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.channel.send(ldata["errorPermissionMissing"])
+
+@client.command()
+async def update(ctx, atype, *, text):
+
+    gid = str(ctx.guild.id)
+    updates = client.get_channel(746375690043130057)
+
+    with open('data/guilds.json', encoding='utf-8') as f:
+        data = json.load(f)
+
+    lang = data[gid]["language"]
+    with open('langages/{}.json'.format(lang), encoding='utf-8') as lf:
+        ldata = json.load(lf)
+
+    if ctx.author.id == 157588494460518400:
+        
+        L = text.split('|')
+
+        if atype == "annonce":
+            ecolor = discord.Color.from_rgb(100,10,10)
+        elif atype == "update":
+            ecolor = discord.Color.green()
+        elif atype == "test":
+            ecolor = discord.Color.gold()
+
+        embed = discord.Embed(
+            colour = ecolor,
+            title = ldata["updateTitle"]
+        )
+        embed.set_author(
+            name = ctx.author,
+            icon_url = ctx.author.avatar_url
+        )
+
+        for i in range(0, len(L), 2):
+            embed.add_field(
+                name = L[i],
+                value = L[i+1],
+                inline = False
+            )
+
+        if atype == 'test':
+            await updates.send('**ANNOUNCEMENT TEST**')
+            await updates.send(embed=embed)
+            
+        else:
+            for guild in client.guilds:
+                print(guild.name)
+                channel = discord.utils.get(guild.text_channels, name='lg-announcements')
+                if channel == None:
+                    await updates.send("``{}`` n'a pas de channel lg-announcements".format(guild.name))
+                else:
+                    await channel.send(embed=embed)
+    
+    else:
+        await ctx.channel.send(ldata["errorPermissionMissing"])
 
 
 @client.command()
@@ -310,7 +402,7 @@ async def help(ctx):
         gid = str(ctx.guild.id)
 
         with open('data/guilds.json', encoding='utf-8') as f:
-                data = json.load(f)
+            data = json.load(f)
 
         lang = data[gid]["language"]
         with open('langages/{}.json'.format(lang), encoding='utf-8') as lf:
@@ -318,9 +410,48 @@ async def help(ctx):
 
         author = ctx.author
 
+        embed0 = discord.Embed(
+            colour = discord.Color.from_rgb(123,23,43),
+            title = ldata["helpPage0Title"],
+            description = ldata["helpPage0Desc"]
+        )
+        embed0.add_field(
+            name = ldata["helpPage0Field1Name"],
+            value = ldata["helpPage0Field1Value"],
+            inline = False
+        )
+        embed0.add_field(
+            name = ldata["helpPage0Field2Name"],
+            value = ldata["helpPage0Field2Value"],
+            inline = False
+        )
+        embed0.add_field(
+            name = ldata["helpPage0Field3Name"],
+            value = ldata["helpPage0Field3Value"],
+            inline = True
+        )
+        embed0.add_field(
+            name = ldata["helpPage0Field4Name"],
+            value = ldata["helpPage0Field4Value"],
+            inline = True
+        )
+        embed0.add_field(
+            name = ldata["helpPage0Field5Name"],
+            value = ldata["helpPage0Field5Value"],
+            inline = True   
+        )
+        embed0.add_field(
+            name = ldata["helpPage0Field6Name"],
+            value = ldata["helpPage0Field6Value"],
+            inline = False
+        )
+        embed0.set_footer(
+            text = 'Page 1/5 • {0.name}'.format(author)
+        )
+
+
         embed1 = discord.Embed(
             colour = discord.Color.red(),
-            title = ldata["helpPage1Title"]
         )
 
         embed1.set_author(
@@ -333,23 +464,17 @@ async def help(ctx):
         )
 
         embed1.add_field(
-            name = ldata["helpPage1Field1Name"],
-            value = ldata["helpPage1Field1Value"],
-            inline = False
-        )
-
-        embed1.add_field(
             name = ldata["helpPage1Field2Name"],
             value = ldata["helpPage1Field2Value"],
             inline = False
         )
 
         embed1.set_footer(
-            text = 'Page 1/3 • {0.name}'.format(author)
+            text = 'Page 2/5 • {0.name}'.format(author)
         )
 
         embed2 = discord.Embed(
-            colour = discord.Color.dark_blue(),
+            colour = discord.Color.from_rgb(0,0,100),
             title = ldata["helpPage2Title"]
         )
         embed2.set_author(
@@ -369,8 +494,13 @@ async def help(ctx):
             value = ldata["helpPage2Field2Value"],
             inline = False
         )
+        embed2.add_field(
+            name = ldata["helpPage2Field3Name"],
+            value = ldata["helpPage2Field3Value"],
+            inline = False
+        )
         embed2.set_footer(
-            text = 'Page 2/3 • {0.name}'.format(author)
+            text = 'Page 3/5 • {0.name}'.format(author)
         )
 
         embed3 = discord.Embed(
@@ -390,20 +520,58 @@ async def help(ctx):
             value = ldata["helpPage3Field1Value"],
             inline = False
         )
-        embed3.add_field(
-            name = ldata["helpPage3Field2Name"],
-            value = ldata["helpPage3Field2Value"],
+        embed3.set_footer(
+            text = 'Page 4/5 • {0.name}'.format(author)
+        )
+
+        embed4 = discord.Embed(
+            colour = discord.Color.green(),
+            title = ldata["helpPage4Title"]
+        )
+        embed4.set_author(
+            name = "LG Bot",
+            icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
+        )
+        embed4.set_thumbnail(
+            url='https://www.loups-garous-en-ligne.com/jeu/assets/images/carte2.png'
+        )
+        embed4.add_field(
+            name = ldata["helpPage4Field1Name"],
+            value = ldata["helpPage4Field1Value"],
             inline = False
         )
-        embed3.set_footer(
-            text = 'Page 3/3 • {0.name}'.format(author)
+        embed4.set_footer(
+            text = 'Page 5/5 • {0.name}'.format(author)
         )
 
-        await ctx.channel.send(ldata["helpNoticeUser"].format(author))
+        #await ctx.channel.send(ldata["helpNoticeUser"].format(author))
+        panel = await ctx.channel.send(embed=embed0)
+        page = 0
+        d = {0: embed0, 1: embed1, 2: embed2, 3: embed3, 4: embed4}
+        await panel.add_reaction(left)
+        await panel.add_reaction(right)
 
-        await author.send(embed=embed1)
-        await author.send(embed=embed2)
-        await author.send(embed=embed3)
+        def checkHelp(reaction, user):
+            return (user == author) and (panel.id == reaction.message.id) and (str(reaction.emoji) == left or str(reaction.emoji) == right)
+        
+        while True:
+            try:
+                reaction, user = await client.wait_for("reaction_add", check=checkHelp, timeout=120.0)
+                if str(reaction.emoji) == right:
+                    if page < 4:
+                        page += 1
+                    else:
+                        page = 0
+                    await panel.edit(embed=d[page])
+                elif str(reaction.emoji) == left:
+                    if page > 0:
+                        page -= 1
+                    else:
+                        page = 4
+                    await panel.edit(embed=d[page])
+            except asyncio.TimeoutError:
+                break
+
 
 
 @client.command()
@@ -417,7 +585,6 @@ async def test(ctx):
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
 async def lsetting(ctx, langs):
 
     gid = str(ctx.guild.id)
@@ -429,19 +596,22 @@ async def lsetting(ctx, langs):
         data[gid]["language"] = langs
         with open("data/guilds.json", 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
-        
-        lang = data[gid]["language"]
-        with open('langages/{}.json'.format(lang), encoding='utf-8') as lf:
-            ldata = json.load(lf)
 
-        await ctx.channel.send(ldata["lsettingsConfirmation"].format(langs))
+        if ctx.author.guild_permissions.administrator:
+        
+            lang = data[gid]["language"]
+            with open('langages/{}.json'.format(lang), encoding='utf-8') as lf:
+                ldata = json.load(lf)
+            await ctx.channel.send(ldata["lsettingsConfirmation"].format(langs))
+
+        else:
+            await ctx.channel.send(ldata["errorPermissionMissing"])
 
     else:
         await ctx.channel.send(ldata["lsettingsError"])
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
 async def setup(ctx):
 
     author = ctx.author
@@ -460,111 +630,165 @@ async def setup(ctx):
     elif lang == 'english':
         chans = chans_en
 
-    try:
-        if len(d[gid]["channels"]) > 0:
-            await ctx.channel.send(ldata["setupAlreadyExecuted"])
-            d[gid]["in_game"] = False
-            d[gid]["mdj"] = None
+    if ctx.author.guild_permissions.administrator:
+
+        try:
+            if len(d[gid]["channels"]) > 0:
+                await ctx.channel.send(ldata["setupAlreadyExecuted"])
+                d[gid]["in_game"] = False
+                d[gid]["mdj"] = None
+                with open("data/guilds.json", 'w', encoding='utf-8') as f:
+                    json.dump(d, f, indent=4, ensure_ascii=False)
+        except:
+            d.update({gid:{"channels":[], "in_game": False, "mdj": None, "valuepf": 25}})
             with open("data/guilds.json", 'w', encoding='utf-8') as f:
                 json.dump(d, f, indent=4, ensure_ascii=False)
-    except:
-        d.update({gid:{"channels":[], "in_game": False, "mdj": None, "valuepf": 25}})
-        with open("data/guilds.json", 'w', encoding='utf-8') as f:
-            json.dump(d, f, indent=4, ensure_ascii=False)
 
-    if len(d[gid]["channels"]) == 0:
+        if len(d[gid]["channels"]) == 0:
 
-        guild = ctx.guild
-        text_channel_list = []
-        channels = []
+            guild = ctx.guild
+            text_channel_list = []
+            channels = []
 
-        embed = discord.Embed(
-                colour = discord.Color.red(),
-                title = ldata["setupErrorEmbedTitle"]
-            )
+            embed = discord.Embed(
+                    colour = discord.Color.red(),
+                    title = ldata["setupErrorEmbedTitle"]
+                )
 
-        name = ldata["categoryName"]
-        category = discord.utils.get(ctx.guild.categories, name=name)
+            name = ldata["categoryName"]
+            category = discord.utils.get(ctx.guild.categories, name=name)
 
-        is_categ = False
+            is_categ = False
 
-        for categorie in guild.categories:
-            if str(categorie) == name:
-                is_categ = True
-                break
+            for categorie in guild.categories:
+                if str(categorie) == name:
+                    is_categ = True
+                    break
 
-        if is_categ == False:
-            await guild.create_category(name)
+            if is_categ == False:
+                await guild.create_category(name)
 
-        print(is_categ)
-        category = discord.utils.get(ctx.guild.categories, name=name)
+            print(is_categ)
+            category = discord.utils.get(ctx.guild.categories, name=name)
 
 
-        for channel in guild.text_channels:
-            if str(channel.category) == name:
-                text_channel_list.append(str(channel.name))
+            for channel in guild.text_channels:
+                if str(channel.category) == name:
+                    text_channel_list.append(str(channel.name))
 
 
-        print(text_channel_list)
+            print(text_channel_list)
 
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False, read_message_history=False, mention_everyone=False, attach_files=False, embed_links=False)
-        }
-        overwrites_pdv = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, read_message_history=True, mention_everyone=False, attach_files=False, embed_links=False)
-        }
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False, read_message_history=False, mention_everyone=False, attach_files=False, embed_links=False)
+            }
+            overwrites_pdv = {
+                guild.default_role: discord.PermissionOverwrite(read_messages=True, send_messages=False, read_message_history=True, mention_everyone=False, attach_files=False, embed_links=False)
+            }
 
-        for i in range(0,30):
+            for i in range(0,30):
 
-            if chans[i] in text_channel_list:
-                print('{} déjà créée'.format(chans[i]))
-    
-            else:
-                if i == 1 or i == 2:
-                    await guild.create_text_channel(chans[i], category=category, overwrites=overwrites_pdv) 
+                if chans[i] in text_channel_list:
+                    print('{} déjà créée'.format(chans[i]))
+        
                 else:
-                    await guild.create_text_channel(chans[i], category=category, overwrites=overwrites)
-                print('{} OK'.format(chans[i]))
+                    if i == 1 or i == 2:
+                        await guild.create_text_channel(chans[i], category=category, overwrites=overwrites_pdv) 
+                    else:
+                        await guild.create_text_channel(chans[i], category=category, overwrites=overwrites)
+                    print('{} OK'.format(chans[i]))
 
-            try:
-                channels.append((discord.utils.get(guild.text_channels, name=chans[i])).id)
-            except:
-                pass
-        
-        with open('data/guilds.json', encoding='utf-8') as json_file: 
-            data = json.load(json_file) 
+                try:
+                    channels.append((discord.utils.get(guild.text_channels, name=chans[i])).id)
+                except:
+                    pass
+            
+            with open('data/guilds.json', encoding='utf-8') as json_file: 
+                data = json.load(json_file) 
 
-        data[gid]["channels"] = channels
+            data[gid]["channels"] = channels
 
-        with open('data/guilds.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent = 4, ensure_ascii=False)
-        
-        channels = [client.get_channel(idc) for idc in channels]
-        print(channels)
+            with open('data/guilds.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent = 4, ensure_ascii=False)
+            
+            channels = [client.get_channel(idc) for idc in channels]
+            print(channels)
 
-        await channels[0].send(ldata["setupOver"])
+            await channels[0].send(ldata["setupOver"])
+
+    else:
+        await ctx.channel.send(ldata["errorPermissionMissing"])
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
 async def delete(ctx):
 
-    # A FINIR
+    gid = str(ctx.guild.id)
 
-    guild = ctx.guild
+    with open('data/guilds.json', encoding='utf-8') as f:
+        data = json.load(f)
 
-    name = ldata["categoryName"]
-    category = discord.utils.get(ctx.guild.categories, name=name)
+    lang = data[gid]["language"]
+    with open('langages/{}.json'.format(lang), encoding='utf-8') as lf:
+        ldata = json.load(lf)
 
-    for channel in guild.text_channels:
-        if str(channel.category) == name:
-            await channel.delete()
+    if ctx.author.guild_permissions.administrator:
+
+        channels = [client.get_channel(k) for k in data[gid]["channels"]]
+        print(data[gid]["channels"])
+        if len(data[gid]["channels"]) == 0:
+            
+            await ctx.channel.send(ldata["deleteError"].format(non))
+
+        else:
+
+            embed = discord.Embed(
+                colour = discord.Color.from_rgb(85,0,25)
+            )
+
+            embed.set_author(
+                name = "LG Bot",
+                icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
+            )
+
+            embed.add_field(
+                name = ldata["deleteName"],
+                value = ldata["deleteValue"].format(ok, non),
+                inline = False
+            )
+
+            panel = await ctx.channel.send(embed=embed)
+            await panel.add_reaction(ok)
+            await panel.add_reaction(non)
+
+            def checkDelete(reaction, user):
+                return (user == ctx.author) and (str(reaction.emoji) == ok or str(reaction.emoji) == non) and (reaction.message.id == panel.id)
+
+            try:
+                reaction, user = await client.wait_for("reaction_add", check=checkDelete, timeout=30.0)
+            except:
+                pass
+            else:
+                if str(reaction.emoji) == ok:
+                    name = ldata["categoryName"]
+                    category = discord.utils.get(ctx.guild.categories, name=name)
+                    for channel in ctx.guild.text_channels:
+                        if str(channel.category) == name:
+                            await channel.delete()
+                    
+                    await category.delete()
+
+                    data[gid]["channels"] = []
+
+                    with open("data/guilds.json", 'w', encoding='utf-8') as jf:
+                        json.dump(data, jf, indent=4, ensure_ascii=False)
+                else:
+                    await panel.delete()
     
-    await category.delete()
+    else:
+        await ctx.channel.send(ldata["errorPermissionMissing"])
 
-    channels = []
-
-
+"""
 @client.command()
 async def hcreate(ctx):
 
@@ -619,13 +843,12 @@ async def hcreate(ctx):
         await ctx.channel.send(ldata["helpCreateNoticeUser"].format(ctx.author))
 
         await ctx.author.send(embed=embed)
-
+"""
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
-async def create(ctx, strRole, compo = 'visible'):
-#Permet de créer une liste de rôles pour 1 partie
-
+@commands.has_any_role("LG Host")
+async def create(ctx):
+    
     gid = str(ctx.guild.id)
 
     with open('data/guilds.json', encoding='utf-8') as f:
@@ -643,171 +866,217 @@ async def create(ctx, strRole, compo = 'visible'):
     channels = [client.get_channel(k) for k in data[gid]["channels"]]
     in_game = data[gid]["in_game"]
 
-    print("Commande .create exécutée à {} par {}.".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
+    if len(channels) != 0:
 
-    embed = discord.Embed(
-        colour = discord.Color.red(),
-        title = "Commande create"
-    )
+        embed = discord.Embed(
+            colour = discord.Color.from_rgb(0,0,100)
+        )
 
-    embed.set_author(
-        name = "LG Bot",
-        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-    )
-    
-    check_compo = False
-    is_compo = False
-
-    if gid in data:
-
-        if compo == 'visible':
-            is_compo = True
-            check_compo = True
-        elif compo == 'cachée' or compo == "hidden":
-            check_compo = True
-        else:
-            embed.set_author(
-                name = "LG Bot",
-                icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-            )
-
-            embed.add_field(
-                name = ldata["createArgumentErrorEmbedName"], 
-                value = ldata["createArgumentErrorEmbedValue"], 
-                inline = False
-            )
-            
-            await ctx.channel.send(ldata["errorNotice"].format(ctx.author.id))
-            await ctx.send(embed=embed)
-            
-
-        if check_compo == True:
-            Lroles_dispo = []
-            Lroles = strRole.split(',')
-            for role in Lroles:
-                if role not in liste_roles:
-
-                    embed.add_field(
-                        name =ldata["createRoleNotValidEmbedName"], 
-                        value = ldata["createRoleNotValidEmbedValue"].format(role), 
-                        inline = False
-                    )
-                    
-                    await ctx.channel.send(ldata["createArgumentErrorNotice"].format(ctx.author.id))
-                    await ctx.send(embed=embed)
-
-                    Lroles_dispo = []
-                    check_compo = False
-                    break
-            
-                else:
-                    Lroles_dispo.append(role)
-
-            if ('Voleur' in Lroles_dispo and 'Sectaire' in Lroles_dispo) or ('Voleur' in Lroles_dispo and 'JDF' in Lroles_dispo) or ('Voleur' in Lroles_dispo and 'Imposteur' in Lroles_dispo) or ('Voleur' in Lroles_dispo and 'Traitre' in Lroles_dispo) or ('Voleur' in Lroles_dispo and is_compo == False):
-                await ctx.channel.send("Impossible d'avoir un Voleur si il y a un Abominable Sectaire / Joueur de Flûte / Imposteur / Traître dans la partie, ou si la composition est cachée. Veuillez créer un autre composition.")
-                Lroles_dispo = []
-                check_compo = False
-
-            if ('Imposteur' in Lroles_dispo and 'Traitre' in Lroles_dispo):
-                await ctx.channel.send("Impossible d'avoir un Imposteur et un Traître dans la même partie.")
-                Lroles_dispo = []
-                check_compo = False
-            
-            if Lroles_dispo.count('Sectaire') > 1:
-                await ctx.channel.send("Impossible d'avoir plusieurs sectaires dans la même partie.")
-                Lroles_dispo = []
-                check_compo = False
-
-
-            if 'Chaperon' in Lroles_dispo and 'Chasseur' not in Lroles_dispo:
-                await ctx.channel.send("Impossible d'avoir un Chaperon Rouge sans Chasseur")
-                Lroles_dispo = []
-                check_compo = False
-      
-        if check_compo == True:   
-
-            if len(Lroles_dispo) != 0:
-
-                embedc = discord.Embed(
-                    colour = discord.Color.dark_blue(),
-                    title = ldata["createConfrimTitle"]
-                )
-
-                Lr = ["__{}__".format(k) for k in Lroles_dispo]
-                embedc.add_field(
-                    name = ldata["createConfrimField1Name"],
-                    value = ', '.join(Lr),
-                    inline = False
-                )
-
-                embedc.add_field(
-                    name = ldata["createConfrimField2Name"],
-                    value = ldata["createConfrimField2Value"].format(compo),
-                    inline = False
-                )
-  
-                embedc.set_author(
-                    name = "LG Bot",
-                    icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-                )
-
-                await ctx.channel.send(ldata["createGameCreated"].format(ctx.author))
-                await ctx.channel.send(embed=embedc)
-                await channels[1].purge(limit=50)
-                await channels[1].send(embed=embedc)
-
-                if in_game == False:
-
-                    with open('data/games.json', encoding='utf-8') as json_file: 
-                        data = json.load(json_file) 
-
-                    data.update({str(ctx.author.id):{"guild":ctx.guild.id, "Lp": {}, "Lroles": [], "idtoemoji": {}, "dictemoji": {}, "is_compo": is_compo, "game_started": False, "day": True, "is_enfant": False, "ancien_dead": False, "check_couple": False, "cpt_jour": 0, "can_vote": False}})
-                    
-                    with open('data/games.json', 'w', encoding='utf-8') as f:
-                        json.dump(data, f, indent = 4, ensure_ascii=False)
-
-                with open('data/games.json', encoding='utf-8') as jf:
-                    gdata = json.load(jf)
-                
-                gdata[str(ctx.author.id)]["Lroles"] = Lroles_dispo
-
-                with open('data/games.json', 'w', encoding='utf-8') as f:
-                    json.dump(gdata, f, indent=4, ensure_ascii=False)
-
-
-
-                with open('data/guilds.json', encoding='utf-8') as json_file:
-                    data = json.load(json_file)
-                
-                data[gid]["in_game"] = True
-                data[gid]["mdj"] = ctx.author.id
-
-                with open('data/guilds.json', 'w', encoding='utf-8') as f:
-                    json.dump(data, f, indent=4, ensure_ascii=False)
-
-                    
-
-    else:
         embed.set_author(
             name = "LG Bot",
             icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
         )
 
         embed.add_field(
-            name =ldata["createSetupErrorName"],
-            value = ldata["createSetupErrorValue"], 
+            name = ldata["createWaitForName1"],
+            value = ldata["createWaitForValue"],
             inline = False
         )
-        
-        await ctx.channel.send(ldata["errorNotice"].format(ctx.author.id))
-        await ctx.send(embed=embed)
+        st = ', '.join(liste_roles)
+        embed.add_field(
+            name = ldata["createWaitForName2"],
+            value = "```{}```".format(st),
+            inline = False
+        )
 
-    print(gdata[str(ctx.author.id)]["Lroles"])
+        panel = await ctx.channel.send(embed=embed)
+
+        def checkCreate(message):
+            return message.author == ctx.author and ctx.channel == message.channel
+
+        try:
+            message = await client.wait_for("message", check=checkCreate, timeout=60.0)
+        except asyncioTimeoutError:
+            pass
+        else:
+            await panel.delete()
+            Lroles_dispo = []
+            ok_roles = True
+            Lroles = message.content.split(", ")
+            for role in Lroles:
+                if role not in liste_roles:
+                    print(role)
+                    await ctx.channel.send(ldata["createRoleNotValidEmbedValue"].format(role))
+                    ok_roles = False
+                    break
+                else:
+                    Lroles_dispo.append(role)
+
+            if lang == "french":
+
+                if ('Voleur' in Lroles_dispo and 'Sectaire' in Lroles_dispo) or ('Voleur' in Lroles_dispo and 'JDF' in Lroles_dispo) or ('Voleur' in Lroles_dispo and 'Imposteur' in Lroles_dispo) or ('Voleur' in Lroles_dispo and 'Traitre' in Lroles_dispo):
+                    await ctx.channel.send("❌ Une combinaison de rôle est incompatible. Le **Voleur** n'est pas compatible avec: ``Sectaire, Joueur de Flûte, Imposteur, Traître``")
+                    ok_roles = False
+
+                if ('Imposteur' in Lroles_dispo and 'Traitre' in Lroles_dispo):
+                    await ctx.channel.send("❌ Impossible d'avoir un Imposteur et un Traître dans la même partie.")
+                    ok_roles = False
+                
+                oneRoles = ['Voyante','Chasseur','Jaloux','Ancien','Sorcière','PF','Bouc','Idiot','Corbeau','Chaman','Renard','Ours','Chevalier','Salvateur','LGA','IPDL','LGB','Cupidon','JDF','Ange','Enfant','Voleur','Sectaire','Juge','Confesseur','Chaperon','Ankou','Dictateur','Noctambule','Oeil','Traitre','Imposteur','Faucheur','Servante','Assassin','Devin']
+                for role in oneRoles:
+                    if Lroles_dispo.count(role) > 1:
+                        await ctx.channel.send("❌ Impossible d'avoir plusieurs **{}** dans la même partie.".format(role))
+                        ok_roles = False
+                        break
+
+                if 'Chaperon' in Lroles_dispo and 'Chasseur' not in Lroles_dispo:
+                    await ctx.channel.send("❌ Impossible d'avoir un Chaperon Rouge sans Chasseur")
+                    ok_roles = False
+            
+            elif lang == "english":
+
+                if ('Thief' in Lroles_dispo and 'Sectairian' in Lroles_dispo) or ('Thief' in Lroles_dispo and 'PP' in Lroles_dispo) or ('Thief' in Lroles_dispo and 'Impostor' in Lroles_dispo) or ('Thief' in Lroles_dispo and 'Traitor' in Lroles_dispo):
+                    await ctx.channel.send("❌ A role combination is not allowed. A **Thief** can't be in the same roster as: ``Sectarian, Pied Piper, Impostor, Traitor``")
+                    ok_roles = False
+
+                if ('Impostor' in Lroles_dispo and 'Traitor' in Lroles_dispo):
+                    await ctx.channel.send("❌ A role combination is not allowed: A **Traitor** and an **Impostor** cannot be in the same game.")
+                    ok_roles = False
+                
+                oneRoles = ['Oracle','Hunter','Jealous','Ancient','Witch','Girl','Scapegoat','Idiot','Crow','Shaman','Fox','Bear','Knight','Guard','AW','WF','WW','Cupid','PP','Angel','Child','Thief','Sectarian','Juge','Confessor','RRH','Ankou','Dictator','Owl','Eye','Traitor','Impostor','Reaper','Servant','Assassin','Diviner']
+                for role in oneRoles:
+                    if Lroles_dispo.count(role) > 1:
+                        await ctx.channel.send("❌ You cannot have multiple **{}** in the game.".format(role))
+                        ok_roles = False
+                        break
+
+                if 'RRH' in Lroles_dispo and 'Hunter' not in Lroles_dispo:
+                    await ctx.channel.send("❌ You cannot have a **Red Riding Hood** in the game without a **Hunter**")
+                    ok_roles = False
+                
+            if ok_roles == True:
+
+                if len(Lroles_dispo) != 0:
+
+                    if 'Voleur' in Lroles_dispo or 'Imposteur' in Lroles_dispo or 'Traitre' in Lroles_dispo or 'Chaman' in Lroles_dispo or 'IPDL' in Lroles_dispo or 'Thief' in Lroles_dispo or 'Impostor' in Lroles_dispo or 'Traitor' in Lroles_dispo or 'Shaman' in Lroles_dispo or 'WF' in Lroles_dispo:
+                        evalue = ldata["createVisibilityValueHidden"]
+                    else:
+                        evalue = ldata["createVisibilityValueVisible"]
+                    
+                    embed = discord.Embed(
+                        colour = discord.Color.from_rgb(0,0,100),
+                        description = "Composition: {}".format(', '.join(Lroles_dispo))
+                    )
+
+                    embed.add_field(
+                        name = ldata["createVisibilityName"],
+                        value = evalue,
+                        inline = False
+                    )
+    
+                    embed.set_author(
+                        name = "LG Bot",
+                        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
+                    )
+
+                    panel2 = await ctx.channel.send(embed=embed)
+                    await panel2.add_reaction('👁️')
+                    if 'Voleur' in Lroles_dispo or 'Imposteur' in Lroles_dispo or 'Traitre' in Lroles_dispo or 'Chaman' in Lroles_dispo or 'IPDL' in Lroles_dispo or 'Thief' in Lroles_dispo or 'Impostor' in Lroles_dispo or 'Traitor' in Lroles_dispo or 'Shaman' in Lroles_dispo or 'WF' in Lroles_dispo:
+                        pass
+                    else:
+                        await panel2.add_reaction(non)
+
+                    def checkCreate2(reaction, user):
+                        return (user == ctx.author) and (reaction.message.id == panel2.id) and (str(reaction.emoji) == '👁️' or str(reaction.emoji) == non)
+
+                    try:
+                        reaction, user = await client.wait_for("reaction_add", check=checkCreate2, timeout=30.0)
+                    except asyncioTimeoutError:
+                        pass
+                    else:
+
+                        await channels[1].purge(limit=50)
+
+                        if str(reaction.emoji) == '👁️':
+                            compo = ldata["compoVisible"]
+                            is_compo = True
+
+                        else:
+                            compo = ldata["compoHidden"]
+                            await channels[1].send(ldata["compoIsHidden"])
+                            is_compo = False
+
+                        await panel2.delete()
+
+                        if in_game == False:
+                            with open('data/games.json', encoding='utf-8') as json_file: 
+                                data = json.load(json_file) 
+                            data.update({str(ctx.author.id):{"guild":ctx.guild.id, "Lp": {}, "Lroles": [], "idtoemoji": {}, "dictemoji": {}, "is_compo": is_compo, "game_started": False, "day": True, "is_enfant": False, "ancien_dead": False, "check_couple": False, "cpt_jour": 0, "can_vote": False}})
+                            with open('data/games.json', 'w', encoding='utf-8') as f:
+                                json.dump(data, f, indent = 4, ensure_ascii=False)
+
+                        with open('data/games.json', encoding='utf-8') as jf:
+                            gdata = json.load(jf)
+
+                        gdata[str(ctx.author.id)]["Lroles"] = Lroles_dispo
+                        
+                        if compo == ldata["compoVisible"]:
+                            gdata[str(ctx.author.id)]["is_compo"] = True
+                        else:
+                            gdata[str(ctx.author.id)]["is_compo"] = False
+
+                        with open('data/games.json', 'w', encoding='utf-8') as f:
+                            json.dump(gdata, f, indent=4, ensure_ascii=False)
+
+                        with open('data/guilds.json', encoding='utf-8') as json_file:
+                            data = json.load(json_file)
+                        
+                        data[gid]["in_game"] = True
+                        data[gid]["mdj"] = ctx.author.id
+
+                        with open('data/guilds.json', 'w', encoding='utf-8') as f:
+                            json.dump(data, f, indent=4, ensure_ascii=False)
+
+
+                        embedc = discord.Embed(
+                            colour = discord.Color.from_rgb(0,0,100),
+                            title = ldata["createConfrimTitle"]
+                        )
+
+                        Lr = ["{}".format(k) for k in Lroles_dispo]
+                        st = ", ".join(Lr)
+
+                        embedc.add_field(
+                            name = ldata["createConfrimField1Name"],
+                            value = "```{}```".format(st),
+                            inline = False
+                        )
+
+                        embedc.add_field(
+                            name = ldata["createConfrimField2Name"],
+                            value = ldata["createConfrimField2Value"].format(compo),
+                            inline = False
+                        )
+
+                        embedc.set_author(
+                            name = "LG Bot",
+                            icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
+                        )
+
+                        await ctx.channel.send(ldata["createGameCreated"].format(ctx.author))
+                        await ctx.channel.send(embed=embedc)
+                        if compo == ldata["compoVisible"]:
+                            await channels[1].send(embed=embedc)
+                        await channels[1].send(ldata["createGameMaster"].format(ctx.author))
+
+    else: 
+        await ctx.channel.send(ldata["createSetupErrorValue"])
+        await ctx.send(embed=embed)
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
-async def inscription(ctx, action):
+@commands.has_any_role("LG Host")
+async def sign(ctx, action = 'create'):
     # Permet d'inscrire automatiquement tout le monde à la partie.
 
     gid = str(ctx.guild.id)
@@ -838,7 +1107,7 @@ async def inscription(ctx, action):
     dicop_id_to_emoji = gdata[aid]["idtoemoji"]
     dicop_emoji = gdata[aid]["dictemoji"]
 
-    print("Commande .inscription {} exécutée à {} par {}.".format(action, datetime.now().strftime("%H:%M:%S"), ctx.author))
+    print("Commande .sign {} exécutée à {} par {}.".format(action, datetime.now().strftime("%H:%M:%S"), ctx.author))
 
 
     embed = discord.Embed(
@@ -1015,7 +1284,7 @@ async def inscription(ctx, action):
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
+@commands.has_any_role("LG Host")
 async def remove(ctx, *, member : discord.User):
     
     gid = str(ctx.guild.id)
@@ -1080,8 +1349,8 @@ async def remove(ctx, *, member : discord.User):
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
-async def joueurs(ctx):
+@commands.has_any_role("LG Host")
+async def players(ctx):
 #Affiche la liste de tous les rôles
 
     print("Commande .liste exécutée à {} par {}.".format(datetime.now().strftime("%H:%M:%S"), ctx.author))
@@ -1171,13 +1440,6 @@ async def roles(ctx):
             trad_roles = trad_roles_en
             desc_roles = desc_roles_en
 
-        user = ctx.author
-
-        if ctx.channel.type is discord.ChannelType.private:
-            pass
-        else:
-            await ctx.channel.send(ldata["rolesNoticeUser"].format(user))
-
         def Ldivide(L,n):
 
             for i in range(0, len(L), n):  
@@ -1190,6 +1452,9 @@ async def roles(ctx):
 
         Lall = [LrV,LrG,LrS,LrA]
 
+        d = {}
+        cpt = 0
+        author = ctx.author
 
         for Lgr in Lall:
 
@@ -1201,7 +1466,7 @@ async def roles(ctx):
 
                 elif Lgr == LrG:
                     ecolour = discord.Color.red()
-                    etitle = ldata["rolesWerwolves"]
+                    etitle = ldata["rolesWerewolves"]
 
                 elif Lgr == LrS:
                     ecolour = discord.Color.default()
@@ -1234,11 +1499,41 @@ async def roles(ctx):
                         inline = False
                     )
 
-                await user.send(embed=embed)
+                #await ctx.channel.send(embed=embed)
 
+                
+                d[cpt] = embed
+                cpt += 1
+
+        page = 0
+        panel = await ctx.channel.send(embed=d[page])
+        await panel.add_reaction(left)
+        await panel.add_reaction(right)
+
+        def checkRoles(reaction, user):
+            return (user == author) and (panel.id == reaction.message.id) and (str(reaction.emoji) == left or str(reaction.emoji) == right)
+        
+        while True:
+            try:
+                reaction, user = await client.wait_for("reaction_add", check=checkRoles, timeout=120.0)
+                if str(reaction.emoji) == right:
+                    if page < len(list(d))-1:
+                        page += 1
+                    else:
+                        page = 0
+                    await panel.edit(embed=d[page])
+                elif str(reaction.emoji) == left:
+                    if page > 0:
+                        page -= 1
+                    else:
+                        page = len(list(d))-1
+                    await panel.edit(embed=d[page])
+            except asyncio.TimeoutError:
+                break
+                
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
+@commands.has_any_role("LG Host")
 async def start(ctx, state_couple = 'non'):
 #Commande de départ
 
@@ -1307,7 +1602,7 @@ async def start(ctx, state_couple = 'non'):
     else:
         roles_check = '❌'
 
-    if state_couple == 'couple' or state_couple == 'non':
+    if state_couple == 'couple' or state_couple == 'non' or state_couple == 'lovers':
         c_check = '✅'
     else:
         c_check = '❌'
@@ -1457,23 +1752,23 @@ async def start(ctx, state_couple = 'non'):
                 annoncef.append(ldata["startPlayerHasRoleAnnounce"].format(member, dicop_id_to_emoji[str(member.id)], role_given))
 
 
-                gdata[aid]["Lp"][str(member.id)] = [str(member), role_given, 'Non', 'Non', 'Non', 'Non', 'Non', 'Non', 'Non', 'Non', 'Non', dicop_id_to_emoji[str(member.id)]]
-                # 0: joueur # 1: rôle # 2: couple # 3: maitre/enfant # 4: charmé # 5: secte # 6: infecté # 7: imposteur # 8: rôle imposteur (LG) # 9: rôle traître # 10: peut voter # 11: emoji joueur
+                gdata[aid]["Lp"][str(member.id)] = [str(member), role_given, 'Non', 'Non', 'Non', 'Non', 'Non', 'Non', 'Non', 'Non', 'Non', dicop_id_to_emoji[str(member.id)], role_given]
+                # 0: joueur # 1: rôle # 2: couple # 3: maitre/enfant # 4: charmé # 5: secte # 6: infecté # 7: imposteur # 8: rôle imposteur (LG) # 9: rôle traître # 10: peut voter # 11: emoji joueur # 12: role backup revive command
 
-                if role_given == 'Sectaire':
+                if role_given == 'Sectaire' or role_given == 'Sectarian':
                     membersect = member
 
-                if role_given == 'Traitre':
+                if role_given == 'Traitre' or role_given == 'Traitor':
                     membertraitre = member
 
-                if role_given == 'Imposteur':
+                if role_given == 'Imposteur' or role_given == 'Impostor':
                     memberimp = member
 
 
                 print('Terminé {}'.format(member))
 
 
-        if 'Traitre' in Lroles_dispo:
+        if 'Traitre' in Lroles_dispo or 'Traitor' in Lroles_dispo:
             
             Lroles_traitre = [k for k in liste_roles if (k in liste_village and k not in Lroles_dispo)]
             print(Lroles_traitre)
@@ -1492,7 +1787,7 @@ async def start(ctx, state_couple = 'non'):
             gdata[aid]["Lp"][str(membertraitre.id)][9] = role_traitre
 
 
-        if 'Imposteur' in Lroles_dispo:
+        if 'Imposteur' in Lroles_dispo or 'Impostor' in Lroles_dispo:
 
             Lroles_imp = [k for k in liste_roles if (k not in Lroles_dispo) or (k == 'Jaloux' and state_couple == 'couple')]
 
@@ -1556,7 +1851,7 @@ async def start(ctx, state_couple = 'non'):
                 await reaction.message.delete()
 
 
-        if "Sectaire" in Lroles_dispo:
+        if "Sectaire" in Lroles_dispo or 'Sectarian' in Lroles_dispo:
             Ltemps = [k for k in list(gdata[aid]["Lp"].keys()) if str(gdata[aid]["Lp"][k][1]) != 'Sectaire']
             pop_sect = int(nbp/2)
             sect = rdm.sample(Ltemps, pop_sect)
@@ -1571,7 +1866,7 @@ async def start(ctx, state_couple = 'non'):
             annoncef.append(ldata["startCultListAnnounce"].format(', '.join(sect)))
 
 
-        if state_couple == 'couple':
+        if state_couple == 'couple' or state_couple == 'lovers':
 
             L = [k for k in members if str(k) != str(author) or str(gdata[aid]["Lp"][str(k.id)][1]) != 'Jaloux']
             
@@ -1643,7 +1938,7 @@ async def start(ctx, state_couple = 'non'):
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
+@commands.has_any_role("LG Host")
 async def fmenu(ctx):
     await menu(ctx)
 
@@ -2694,6 +2989,55 @@ async def kill_action(ctx, killedid, step):
     await menu(ctx)
 
 
+@client.command()
+async def revive(ctx, pid):
+
+    gid = str(ctx.guild.id)
+
+    with open('data/guilds.json', encoding='utf-8') as f:
+        data = json.load(f)
+
+    lang = data[gid]["language"]
+    with open('langages/{}.json'.format(lang), encoding='utf-8') as lf:
+        ldata = json.load(lf)
+
+    try:
+        temp = int(pid)
+    except ValueError:
+        await ctx.channel.send(ldata["reviveValueError"])
+    else:
+
+        channels = [client.get_channel(k) for k in data[gid]["channels"]]
+        aid = str(data[gid]["mdj"])
+        mdj = client.get_user(data[gid]["mdj"])
+
+        with open('data/games.json', encoding='utf-8') as gf:
+            gdata = json.load(gf)
+
+        Lp = gdata[aid]["Lp"]
+        Lroles_dispo = gdata[aid]["Lroles"]
+
+        if pid in list(Lp):
+
+            if gdata[aid]["Lp"][str(member.id)][1] == 'Mort':
+
+                gdata[aid]["Lp"][str(member.id)][1] = gdata[aid]["Lp"][str(member.id)][12]
+                gdata[aid]["idtoemoji"][str(member.id)] = gdata[aid]["Lp"][str(member.id)][11]
+                gdata[aid]["dictemoji"][gdata[aid]["Lp"][str(member.id)][11]] = str(member.id)
+                gdata[aid]["Lroles"].append(gdata[aid]["Lp"][str(member.id)][12])
+
+                with open("games.json", 'w', encoding='utf-8') as jf:
+                    json.dump(gdata, jf, ensure_ascii=False)
+
+                await ctx.channel.send(ldata["reviveSucceeded"].format(client.get_user(int(pid))))
+            
+            else:
+                await ctx.channel.send(ldata["reviveNotDead"])
+
+        else:
+            await ctx.channel.send(ldata["reviveIDNotValid"])
+
+
 async def noctambule_action(ctx, victimeid, noctambuleid):
 
     gid = str(ctx.guild.id)
@@ -2822,13 +3166,25 @@ async def mute(ctx, state):
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
 async def purge(ctx, limit):
-    await ctx.channel.purge(limit=int(limit))
 
+    gid = str(ctx.guild.id)
+
+    with open('data/guilds.json', encoding='utf-8') as f:
+        data = json.load(f)
+
+    lang = data[gid]["language"]
+    with open('langages/{}.json'.format(lang), encoding='utf-8') as lf:
+        ldata = json.load(lf)
+
+    if ctx.author.guild_permissions.administrator:
+
+        await ctx.channel.purge(limit=int(limit))
+
+    else:
+        await ctx.channel.send(ldata["errorPermissionMissing"])
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
 async def crypt(ctx, pourcentage):
 
     gid = str(ctx.guild.id)
@@ -2840,39 +3196,43 @@ async def crypt(ctx, pourcentage):
     with open('langages/{}.json'.format(lang), encoding='utf-8') as lf:
         ldata = json.load(lf)
 
-    channels = [client.get_channel(k) for k in data[gid]["channels"]]
-    aid = str(data[gid]["mdj"])
-    mdj = client.get_user(data[gid]["mdj"])
+    if ctx.author.guild_permissions.administrator:
 
-    embed = discord.Embed(
-        colour = discord.Color.red(),
-        title = "Commande crypt"
-    )
-    
-    embed.set_author(
-        name = "LG Bot",
-        icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
-    )
+        channels = [client.get_channel(k) for k in data[gid]["channels"]]
+        aid = str(data[gid]["mdj"])
+        mdj = client.get_user(data[gid]["mdj"])
 
-
-    if int(pourcentage) > 100:
-
-        embed.add_field(
-            name ='.crypt <value>', 
-            value = ldata["cryptEmbedValue"], 
-            inline = False
+        embed = discord.Embed(
+            colour = discord.Color.red(),
+            title = "Commande crypt"
+        )
+        
+        embed.set_author(
+            name = "LG Bot",
+            icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(client.user)
         )
 
-    
-        await ctx.send(embed=embed)
+
+        if int(pourcentage) > 100:
+
+            embed.add_field(
+                name ='.crypt <value>', 
+                value = ldata["cryptEmbedValue"], 
+                inline = False
+            )
+
+        
+            await ctx.send(embed=embed)
+
+        else:
+            data[gid]["valuepf"] = int(pourcentage)
+            await ctx.channel.send(ldata["cryptChanged"].format(data[gid]["valuepf"]))
+
+            with open("data/guilds.json", 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False )
 
     else:
-        data[gid]["valuepf"] = int(pourcentage)
-        await ctx.channel.send(ldata["cryptChanged"].format(data[gid]["valuepf"]))
-
-        with open("data/guilds.json", 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False )
-
+        await ctx.channel.send(ldata["errorPermissionMissing"])
 
 @client.command()
 async def breport(ctx, *, bug):
@@ -2913,7 +3273,6 @@ async def breport(ctx, *, bug):
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
 async def rban(ctx, idb, *, reason = None):
 
     if ctx.author.id == 157588494460518400:
@@ -2966,7 +3325,6 @@ async def rban(ctx, idb, *, reason = None):
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
 async def unban(ctx, idb):       
 
     if ctx.author.id == 157588494460518400:
@@ -2996,7 +3354,6 @@ async def unban(ctx, idb):
             await ctx.channel.send("❌ Cet utilisateur ({}) n'est pas dans la liste des bannis".format(idb))
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
 async def banlist(ctx):       
 
     if ctx.author.id == 157588494460518400:
@@ -3020,7 +3377,7 @@ async def banlist(ctx):
 
 
 @client.command()
-@commands.has_any_role("Maître du Jeu")
+@commands.has_any_role("LG Host")
 async def freset(ctx):
 # Reset de force
     await reset(ctx, ctx.author)

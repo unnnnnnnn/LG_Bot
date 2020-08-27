@@ -20,7 +20,7 @@ from datetime import datetime
 #os.chdir(os.path.dirname(__file__))
 
 
-client = commands.Bot(command_prefix=".")
+client = commands.Bot(command_prefix="lg!")
 client.remove_command("help")
 
 
@@ -28,7 +28,7 @@ client.remove_command("help")
 async def on_ready():
 
     await client.wait_until_ready()
-    await client.change_presence(activity=discord.Game(name="🐺 | .help"))
+    await client.change_presence(activity=discord.Game(name="🐺 | lg!help"))
     print('Bot connecté {0.user}'.format(client))
 
     online = client.get_channel(742095974033260611)
@@ -112,12 +112,12 @@ async def on_guild_channel_create(channel):
         )
         embed.add_field(
             name = "📌 Useful links",
-            value = "[Invite the bot](https://www.google.fr/) - [Support server](https://www.google.fr/) - [French server](https://discord.gg/nuUpb7U)",
+            value = "[Invite the bot](https://discord.com/oauth2/authorize?client_id=683468750582054937&permissions=536734712&scope=bot) - Support Server soon - [French server](https://discord.gg/nuUpb7U)",
             inline = False
         )
         embed.add_field(
             name = "Bot Usage",
-            value = "To start using the bot, an admin needs to enter the `.setup` command. That will create all the channels needed to play the game. \n \nTo host a game you need to have the `LG Host` role that the bot creates when it joins a server. \n \nUse the `.lsetting` command to change the language of the bot (english by default). Available languages are **french** and **english**. \n \nUse the `.help` command to get more informations about the game and commands.",
+            value = "To start using the bot, an admin needs to enter the `lg!setup` command. That will create all the channels needed to play the game. \n \nTo host a game you need to have the `LG Host` role that the bot creates when it joins a server. \n \nUse the `lg!lsetting` command to change the language of the bot (english by default). Available languages are **french** and **english**. \n \nUse the `lg!help` command to get more informations about the game and commands.",
             inline = False
         )
 

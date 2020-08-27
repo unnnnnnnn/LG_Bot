@@ -7,7 +7,7 @@ from discord.utils import get
 from discord.ext import commands
 
 
-os.chdir(os.path.dirname(__file__))
+#os.chdir(os.path.dirname(__file__))
 
 with open('token.txt' ,'r') as f:
     TOKEN = f.readline()

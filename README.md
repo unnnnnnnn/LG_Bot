@@ -6,11 +6,7 @@ LG Bot is a discord bot that allows members of a server to play a board game cal
 
 ## 📌 Usefull links
 
-Invite link soon !
-
-Support Server soon !
-
-French server soon !
+[Invite link](https://discord.com/oauth2/authorize?client_id=683468750582054937&permissions=536734712&scope=bot)
 
 ## ⚙️ Usage
 
@@ -58,7 +54,25 @@ You need to have the **"LG Host"** role to use those commands
 
 * `.freset`: Force the reset of a game.
 
-## ✉️ Contact the admin
+## ⚙️ How to use the bot
+
+Enter the `.setup` command to create the channels
+
+If you have the role **LG Role**, use the command `.create` to create a game
+
+When everyone is in a voice channel, use the `.sign` command to register all the players
+
+Use the `.start` command to start the game
+
+As the game master you will have access to a menu like this one:
+
+![Menu](https://i.ibb.co/pvdr4kh/Capture.png)
+
+You can interact with the reactions, and the menus change between night and day.
+
+The actions done by the reactions are explained on the menus.
+
+## ✉️ Contact me
 
 If you have any question please contact me there:
 

@@ -6,7 +6,7 @@ LG Bot is a discord bot that allows members of a server to play a board game cal
 
 ## 📌 Usefull links
 
-[Invite link](https://discord.com/oauth2/authorize?client_id=683468750582054937&permissions=536734712&scope=bot)
+[**Invite LG Bot to your server**](https://discord.com/oauth2/authorize?client_id=683468750582054937&permissions=536734712&scope=bot)
 
 ## ⚙️ Usage
 

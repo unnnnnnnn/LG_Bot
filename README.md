@@ -8,15 +8,7 @@ LG Bot is a discord bot that allows members of a server to play a board game cal
 
 [**Invite LG Bot to your server**](https://discord.com/oauth2/authorize?client_id=683468750582054937&permissions=536734712&scope=bot)
 
-## ⚙️ Usage
-
-When the bot joins a server, use the command `.setup`
-
-To get help for commands use `.help`
-
-To create a game, use `.create`
-
-### 🛠️ Player commands
+## 🛠️ Player commands
 
 * `.help`: Open the help menu.
 
@@ -24,7 +16,7 @@ To create a game, use `.create`
 
 * `.breport <text>`: Send a bug report, a translation error or a suggestion for the bot to the bot's admins.
 
-### 🛠️ Admin commands
+## 🛠️ Admin commands
 
 * `.setup`: Set all the channels up that are used to play the game.
 
@@ -34,7 +26,7 @@ To create a game, use `.create`
 
 * `.crypt <value>`: Change the chance of a letter changing during message's encryption.
 
-### 🛠️ Game Master commands
+## 🛠️ Game Master commands
 
 You need to have the **"LG Host"** role to use those commands
 

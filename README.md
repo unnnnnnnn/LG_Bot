@@ -76,10 +76,14 @@ If you have any question please contact me there:
 
 ## 📗 Planned updates
 
-* `New game system (only needed channels are created)`
+* `New game system (only needed channels are created)` (HIGH PRIORITY)
 
-* `More languages`
+* `Clean the code` (HIGH PRIORITY)
 
-* `Auto-game setting (basically the game would not need a Game Master to be played)`
+* `More languages` (MEDIUM PRIORITY)
 
-* `Ban command (prevents from playing the game)`
+* `Auto-game setting (basically the game would not need a Game Master to be played)` (MEDIUM PRIORITY)
+
+* `Ban command (prevents from playing the game)` (LOW PRIORITY)
+
+* `Achievements system` (VERY LOW PRIORITY)

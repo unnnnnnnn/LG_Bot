@@ -146,6 +146,7 @@ async def on_message(ctx):
             data = json.load(f)
 
         channels = [client.get_channel(k) for k in data[gid]["channels"]]
+        valuepf = data[gid]["valuepf"]
         aid = str(data[gid]["mdj"])
         
         if data[gid]["mdj"]== None:
@@ -196,7 +197,7 @@ async def on_message(ctx):
                                 colour = discord.Color.from_rgb(254,254,254)
                             )
                             embedv.set_author(
-                                name = "LG Bot",
+                                name = ctx.author.name,
                                 icon_url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(ctx.author)
                             )
                             embedv.add_field(
@@ -205,7 +206,7 @@ async def on_message(ctx):
                                 inline = False
                             )
                             await ctx.author.send(embed=embedv)
-                            await channels[0].send(embed=embedv)
+                            await channels[2].send(embed=embedv)
                             gdata[aid]["Lp"][str(ctx.author.id)][10] = 'Non'
 
                             with open('data/games.json', 'w', encoding='utf-8') as kf:
@@ -254,7 +255,7 @@ async def on_message(ctx):
                                             )
 
                                             await ctx.author.send(embed=embedv)
-                                            await channels[0].send(embed=embedv)
+                                            await channels[2].send(embed=embedv)
                                             break
 
                                         else:
@@ -279,7 +280,6 @@ async def on_message(ctx):
             
             # Cas où il faut crypter un message
             if is_okmsg == True:
-
                 #Cryptage du message
                 msg = ctx.content
                 strm = [c for c in msg]
@@ -292,17 +292,17 @@ async def on_message(ctx):
 
                 # Cas de la PF qui reçoit les msg des LG (pas LGB ni IPDL)          
                 if ctx.channel == channels[8]:
-                    if day == False:     
+                    if day == False:
                         await channels[9].send(''.join(strm))
 
-                    if 'Oeil' in Lroles_dispo and cpt_jour == 1:
+                    if ('Oeil' in Lroles_dispo or 'Eye' in Lroles_dispo) and cpt_jour == 1:
                         await channels[23].send("({}) ".format(ctx.channel.name) + ''.join(strm))
                 
                 # Cas du Chaman qui reçoit le salon des morts
                 elif ctx.channel == channels[3]:
                     await channels[20].send(''.join(strm))
                     
-                    if 'Oeil' in Lroles_dispo and cpt_jour == 1:
+                    if ('Oeil' in Lroles_dispo or 'Eye' in Lroles_dispo) and cpt_jour == 1:
                         await channels[23].send("({}) ".format(ctx.channel.name) + ''.join(strm))
 
                 # Cas du Jaloux qui reçoit le salon du couple
@@ -310,15 +310,16 @@ async def on_message(ctx):
                     if day == True:
                         await channels[21].send(''.join(strm))
                     
-                    if 'Oeil' in Lroles_dispo and cpt_jour == 1:
+                    if ('Oeil' in Lroles_dispo or 'Eye' in Lroles_dispo) and cpt_jour == 1:
                         await channels[23].send("({}) ".format(ctx.channel.name) + ''.join(strm))
 
                 # Cas du 3e Oeil
                 elif ctx.channel in channels:
-                    if ctx.channel.name == 'commandes-bot' or ctx.channel.name == 'roles-de-la-game' or ctx.channel.name == 'place-du-village' or ctx.channel.name == '3e-oeil' or ctx.channel.name == 'chaman' or ctx.channel.name == 'petite-fille' or ctx.channel.name == 'jaloux':
+                    channel = ctx.channel
+                    if channel == channels[0] or channel == channels[1] or channel == channels[2] or channel == channels[3] or channel == channels[23] or channel == channels[20] or channel == channels[9] or channel == channels[21]:
                         pass
                     else:
-                        if 'Oeil' in Lroles_dispo and cpt_jour == 1:
+                        if ('Oeil' in Lroles_dispo or 'Eye' in Lroles_dispo) and cpt_jour == 1:
                             await channels[23].send("({}) ".format(ctx.channel.name) + ''.join(strm))
 
     except:
@@ -1669,7 +1670,10 @@ async def start(ctx, state_couple = 'non'):
         roles_check = '❌'
 
     if state_couple == 'couple' or state_couple == 'non' or state_couple == 'lovers':
-        c_check = '✅'
+        if state_couple == "non" and ("Jealous" in Lroles_dispo or "Jaloux" in Lroles_dispo):
+            c_check = '❌'
+        else:
+            c_check = '✅'
     else:
         c_check = '❌'
 
@@ -1941,8 +1945,8 @@ async def start(ctx, state_couple = 'non'):
 
         if state_couple == 'couple' or state_couple == 'lovers':
 
-            L = [k for k in members if str(k) != str(author) or str(gdata[aid]["Lp"][str(k.id)][1]) != 'Jaloux']
-            
+            L = [k for k in members if str(k) != str(author) and str(gdata[aid]["Lp"][str(k.id)][1]) != 'Jaloux' and str(gdata[aid]["Lp"][str(k.id)][1]) != 'Jealous']
+            print(L)
             i1 = rdm.randint(0,len(L)-1)
             if str(L[i1]) != author:
                 amant1 = L[i1]
@@ -2258,6 +2262,7 @@ async def jour(ctx, dtime):
     is_cover = False
     is_devin = False
 
+    print(day)
 
     if game_started == True:
 
@@ -2321,6 +2326,8 @@ async def jour(ctx, dtime):
                             is_devin = True
                     else:
                         break
+
+                cpt_jour = gdata[aid]["cpt_jour"]
 
                 embedn = discord.Embed(
                     title = ldata["jourEmbedSleepTitle"],
@@ -2400,6 +2407,7 @@ async def jour(ctx, dtime):
                     await channels[6].set_permissions(member, overwrite=can_talk)
                     print("{} OK a été demute de couple".format(str(member)))
 
+            cpt_jour = gdata[aid]["cpt_jour"]
 
             embedj = discord.Embed(
                 title = ldata["jourEmbedWakeUpTitle"],
@@ -2992,7 +3000,9 @@ async def kill_action(ctx, killedid, step):
     dicop_emoji = gdata[aid]["dictemoji"]
     is_compo = gdata[aid]["is_compo"]
     Lroles_dispo = gdata[aid]["Lroles"]
+
     killed_name = client.get_user(int(killedid))
+    killed_member = ctx.guild.get_member(int(killedid))
 
     pla = Lp[killedid]
     rolep = pla[1]
@@ -3000,6 +3010,7 @@ async def kill_action(ctx, killedid, step):
     status_maitre = pla[3]
     status_infect = pla[6]
     status_impost = pla[8]
+
     member = killed_name
 
     if (rolep == 'Ancien' or rolep == 'Ancient') and ancien_dead == False:
@@ -3025,7 +3036,7 @@ async def kill_action(ctx, killedid, step):
             await channels[8].set_permissions(member, overwrite=cant_talk)
             print('OK Enfant')
 
-        if status_couple == 'Oui':
+        if status_couple == 'Couple':
             await ctx.channel.send(ldata["killDoNotForget"])  
             await channels[6].set_permissions(member, overwrite=cant_talk)  
             gdata[aid]["check_couple"] = False
@@ -3084,7 +3095,7 @@ async def kill_action(ctx, killedid, step):
         await ctx.channel.send(embed=embed)
 
         try:
-            await member.edit(mute=True)
+            await killed_member.edit(mute=True)
         except: 
             pass
 
@@ -3351,10 +3362,10 @@ async def mute(ctx, state):
     with open('data/games.json', encoding='utf-8') as gf:
         gdata = json.load(gf)
 
-    dicop_id_to_emoji = gdata[aid]["idtoemoji"]
+    Ljoueurs = gdata[aid]["Ljoueurs"]
 
-    for mid in dicop_id_to_emoji:
-        member = ctx.guild.get_member(int(mid))
+    for mid in Ljoueurs:
+        member = ctx.guild.get_member(mid)
 
         if state == 'mute':
             await member.edit(mute=True)

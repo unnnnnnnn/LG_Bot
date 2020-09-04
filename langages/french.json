@@ -145,7 +145,7 @@
     "startEmbedEndName": "Distribution des rôles",
     "startEmbedErrorTitle": "Erreur de lancement de partie:",
     "startEmbedErrorName": "Un ou plusieurs paramètres ne sont pas respectés",
-    "startEmbedErrorValue": "Veuillez vérifier le lancement de la partie par rapport au récapitulatif ci-dessus.",
+    "startEmbedErrorValue": "Veuillez vérifier le lancement de la partie par rapport au récapitulatif ci-dessus. \nVérifiez si vous avez un Jaloux dans la partie et que vous avez mis le paramètre couple au lancement.",
     "menuGameHasNotStarted": "La partie n'a pas encore commencé. Le menu n'est pas encore disponible.",
     "menuPanelNameDay": "Menu d'interaction jour",
     "menuPanelKillName": "🔪 Tuer une personne",

@@ -10,51 +10,51 @@ LG Bot is a discord bot that allows members of a server to play a board game cal
 
 ## 🛠️ Player commands
 
-* `.help`: Open the help menu.
+* `lg!help`: Open the help menu.
 
-* `.roles`: Open informations about roles.
+* `lg!roles`: Open informations about roles.
 
-* `.breport <text>`: Send a bug report, a translation error or a suggestion for the bot to the bot's admins.
+* `lg!breport <text>`: Send a bug report, a translation error or a suggestion for the bot to the bot's admins.
 
 ## 🛠️ Admin commands
 
-* `.setup`: Set all the channels up that are used to play the game.
+* `lg!setup`: Set all the channels up that are used to play the game.
 
-* `.delete`: Delete all the text channels used to play.
+* `lg!delete`: Delete all the text channels used to play.
 
-* `.lsetting <language>`: Change the bot's language (default is english). Available languages are **french** and **english**
+* `lg!lsetting <language>`: Change the bot's language (default is english). Available languages are **french** and **english**
 
-* `.crypt <value>`: Change the chance of a letter changing during message's encryption.
+* `lg!crypt <value>`: Change the chance of a letter changing during message's encryption.
 
 ## 🛠️ Game Master commands
 
 You need to have the **"LG Host"** role to use those commands
 
-* `.create`: Create a game. All informations will be given once you use the command.
+* `lg!create`: Create a game. All informations will be given once you use the command.
 
-* `.sign ['clear']`: Sign everyone up to the game. Add 'clear' to clear the player list.
+* `lg!sign ['clear']`: Sign everyone up to the game. Add 'clear' to clear the player list.
 
-* `.remove <user>`: Remove someone from the list. You need to write it like a discord tag: Name#XXXX
+* `lg!remove <user>`: Remove someone from the list. You need to write it like a discord tag: Name#XXXX
 
-* `.players`: Show the player list in the game.
+* `lg!players`: Show the player list in the game.
 
-* `.start ['lovers']`: Start a game. Add 'lovers' if you want to have a random Lovers couple in the game.
+* `lg!start ['lovers']`: Start a game. Add 'lovers' if you want to have a random Lovers couple in the game.
 
-* `.revive <id>`: Revive a player that is dead.
+* `lg!revive <id>`: Revive a player that is dead.
 
-* `.fmenu`: Force the apparition of the menu.
+* `lg!fmenu`: Force the apparition of the menu.
 
-* `.freset`: Force the reset of a game.
+* `lg!freset`: Force the reset of a game.
 
 ## ⚙️ How to use the bot
 
-Enter the `.setup` command to create the channels
+Enter the `lg!setup` command to create the channels
 
-If you have the role **LG Role**, use the command `.create` to create a game
+If you have the role **LG Role**, use the command `lg!create` to create a game
 
-When everyone is in a voice channel, use the `.sign` command to register all the players
+When everyone is in a voice channel, use the `lg!sign` command to register all the players
 
-Use the `.start` command to start the game
+Use the `lg!start` command to start the game
 
 As the game master you will have access to a menu like this one:
 
@@ -76,7 +76,7 @@ If you have any question please contact me there:
 
 ## 📗 Planned updates
 
-* `Bot's prefix customization`
+* `New game system (only needed channels are created)`
 
 * `More languages`
 

@@ -80,7 +80,7 @@ If you have any question please contact me there:
 
 * `Clean the code` (HIGH PRIORITY)
 
-* `More languages` (MEDIUM PRIORITY)
+* `More languages` (HIGH/MEDIUM PRIORITY)
 
 * `Auto-game setting (basically the game would not need a Game Master to be played)` (MEDIUM PRIORITY)
 

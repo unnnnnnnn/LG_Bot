@@ -29,11 +29,10 @@ async def on_ready():
 
     await client.wait_until_ready()
     await client.change_presence(activity=discord.Game(name="🐺 | lg!help"))
-    print('Bot connecté {0.user}'.format(client))
 
     online = client.get_channel(742095974033260611)
     updates = client.get_channel(746375690043130057)
-    await online.send('✅ **{0.user}** connecté à ``{1}``'.format(client, datetime.now().strftime("%H:%M:%S")))
+    rapport = client.get_channel(751824930244657223)
 
     # Checking guild
     guildsIds = [str(guild.id) for guild in client.guilds]
@@ -44,7 +43,12 @@ async def on_ready():
     for idg in guildsIds:
         if idg not in data:
             data.update({idg:{"name": client.get_guild(int(idg)).name, "channels":[], "in_game": False, "mdj": None, "valuepf": 25, "language": 'english'}})
-            await updates.send("⬆️ LG Bot a **rejoint** le serveur {} ({})".format(client.get_guild(int(idg)), idg))
+            categories = client.get_guild(int(idg)).categories
+            for c in categories:
+                if c.name == "The Werewolves of Millers Hollow" or c.name == "Les Loups Garous de Thiercelieux":
+                    for channel in c.channels:
+                        data[idg]["channels"].append(channel.id)
+                    break
 
     for ids in list(data):
         if ids not in guildsIds:
@@ -54,8 +58,24 @@ async def on_ready():
                 await updates.send("⬇️ LG Bot a **quitté** le serveur {} ({})".format(client.get_guild(int(ids)), ids))
             data.pop(ids, None)
 
+        else:
+            if len(data[ids]["channels"]) == 0:
+                categories = client.get_guild(int(ids)).categories
+                for c in categories:
+                    if c.name == "The Werewolves of Millers Hollow" or c.name == "Les Loups Garous de Thiercelieux":
+                        for channel in c.channels:
+                            data[ids]["channels"].append(channel.id)
+                        break
+
     with open('data/guilds.json', 'w', encoding='utf-8') as f: 
         json.dump(data, f, indent=4, ensure_ascii=False)
+
+    with open('data/guilds.json', encoding='utf-8') as f: 
+        data = json.load(f)
+    await rapport.send("``{}`` \nGuilds: **{}** \n \n{}".format(datetime.now().strftime("%H:%M:%S"), len(client.guilds),''.join(["__{}__: \nChannels: **{}** \n \n".format(data[idg]["name"], len(data[idg]["channels"])) for idg in data])))
+
+    print('Bot connecté {0.user}'.format(client))
+    await online.send('✅ **{0.user}** connecté à ``{1}``'.format(client, datetime.now().strftime("%H:%M:%S")))
 
 
 
